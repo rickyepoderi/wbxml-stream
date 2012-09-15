@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<si>
+  <indication>si-020</indication>
+  <info>
+    <item class="test1"/>
+  </info>
+</si>

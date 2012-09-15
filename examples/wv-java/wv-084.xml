@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<WV-CSP-Message>
+  <Session>
+    <SessionDescriptor>
+      <SessionType>Inband</SessionType>
+      <SessionID>im.user.com#48815@server.com</SessionID>
+    </SessionDescriptor>
+    <Transaction>
+      <TransactionDescriptor>
+        <TransactionMode>Request</TransactionMode>
+        <TransactionID>IMApp01#12345@NOK5110</TransactionID>
+      </TransactionDescriptor>
+      <TransactionContent>
+        <DeleteList-Request>
+          <ContactList>wv:john/My_enemies@smith.com</ContactList>
+        </DeleteList-Request>
+      </TransactionContent>
+    </Transaction>
+  </Session>
+</WV-CSP-Message>

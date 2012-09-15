@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<WV-CSP-Message>
+  <Session>
+    <SessionDescriptor>
+      <SessionType>Inband</SessionType>
+      <SessionID>im.user.com#48815@server.com</SessionID>
+    </SessionDescriptor>
+    <Transaction>
+      <TransactionDescriptor>
+        <TransactionMode>Request</TransactionMode>
+        <TransactionID>IMApp01#12345@NOK5110</TransactionID>
+      </TransactionDescriptor>
+      <TransactionContent>
+        <Service-Request>
+          <ClientID>
+            <URL>http://206.226.10.25:80/IMPSAPP</URL>
+          </ClientID>
+          <Functions>
+            <WVCSPFeat>
+              <FundamentalFeat/>
+              <PresenceFeat/>
+              <IMFeat/>
+            </WVCSPFeat>
+          </Functions>
+          <AllFunctionsRequest>T</AllFunctionsRequest>
+        </Service-Request>
+      </TransactionContent>
+    </Transaction>
+  </Session>
+</WV-CSP-Message>

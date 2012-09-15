@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<WV-CSP-Message>
+  <Session>
+    <SessionDescriptor>
+      <SessionType>Inband</SessionType>
+      <SessionID>im.user.com#48815@server.com</SessionID>
+    </SessionDescriptor>
+    <Transaction>
+      <TransactionDescriptor>
+        <TransactionMode>Response</TransactionMode>
+        <TransactionID>IMApp01#12345@NOK5110</TransactionID>
+        <Poll>F</Poll>
+      </TransactionDescriptor>
+      <TransactionContent>
+        <GetWatcherList-Response>
+          <User>
+            <UserID>wv:he@there.com</UserID>
+          </User>
+          <User>
+            <UserID>wv:she@there.com</UserID>
+          </User>
+        </GetWatcherList-Response>
+      </TransactionContent>
+    </Transaction>
+  </Session>
+</WV-CSP-Message>

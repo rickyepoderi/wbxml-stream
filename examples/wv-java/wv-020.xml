@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<WV-CSP-Message>
+  <Session>
+    <SessionDescriptor>
+      <SessionType>Inband</SessionType>
+      <SessionID>im.user.com#48815@server.com</SessionID>
+    </SessionDescriptor>
+    <Transaction>
+      <TransactionDescriptor>
+        <TransactionMode>Request</TransactionMode>
+        <TransactionID>IMApp01#12345@NOK5110</TransactionID>
+      </TransactionDescriptor>
+      <TransactionContent>
+        <Search-Request>
+          <SearchPairList>
+            <SearchElement>USER_LAST_NAME</SearchElement>
+            <SearchString>Smith</SearchString>
+          </SearchPairList>
+          <SearchPairList>
+            <SearchElement>USER_ONLINE_STATUS</SearchElement>
+            <SearchString>T</SearchString>
+          </SearchPairList>
+          <SearchLimit>5</SearchLimit>
+        </Search-Request>
+      </TransactionContent>
+    </Transaction>
+  </Session>
+</WV-CSP-Message>

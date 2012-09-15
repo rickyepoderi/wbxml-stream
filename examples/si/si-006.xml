@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!DOCTYPE si PUBLIC "-//WAPFORUM//DTD SI 1.0//EN"
+					"file:///home/ricky/NetBeansProjects/wbxml-stream/dtd/si.dtd">
+<si>
+	<indication action="signal-medium">
+		si-006
+	</indication>
+</si>

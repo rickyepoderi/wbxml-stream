@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<WV-CSP-Message>
+  <Session>
+    <SessionDescriptor>
+      <SessionType>Inband</SessionType>
+      <SessionID>im.user.com#48815@server.com</SessionID>
+    </SessionDescriptor>
+    <Transaction>
+      <TransactionDescriptor>
+        <TransactionMode>Response</TransactionMode>
+        <TransactionID>IMApp01#12345@NOK5110</TransactionID>
+        <Poll>F</Poll>
+      </TransactionDescriptor>
+      <TransactionContent>
+        <Service-Response>
+          <ClientID>
+            <URL>http://206.226.10.25:80/IMPSAPP</URL>
+          </ClientID>
+          <Functions>
+            <WVCSPFeat>
+              <FundamentalFeat>
+                <SearchFunc/>
+              </FundamentalFeat>
+            </WVCSPFeat>
+          </Functions>
+          <AllFunctions>
+            <WVCSPFeat/>
+          </AllFunctions>
+        </Service-Response>
+      </TransactionContent>
+    </Transaction>
+  </Session>
+</WV-CSP-Message>

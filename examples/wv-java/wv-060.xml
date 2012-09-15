@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<WV-CSP-Message>
+  <Session>
+    <SessionDescriptor>
+      <SessionType>Inband</SessionType>
+      <SessionID>im.user.com#48815@server.com</SessionID>
+    </SessionDescriptor>
+    <Transaction>
+      <TransactionDescriptor>
+        <TransactionMode>Request</TransactionMode>
+        <TransactionID>IMApp01#12345@NOK5110</TransactionID>
+      </TransactionDescriptor>
+      <TransactionContent>
+        <GetMessageList-Request>
+          <GroupID>wv:john/chatgroup@there.com</GroupID>
+          <MessageCount>5</MessageCount>
+        </GetMessageList-Request>
+      </TransactionContent>
+    </Transaction>
+  </Session>
+</WV-CSP-Message>

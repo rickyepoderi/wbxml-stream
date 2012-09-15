@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<WV-CSP-Message>
+  <Session>
+    <SessionDescriptor>
+      <SessionType>Inband</SessionType>
+      <SessionID>im.user.com#48815@server.com</SessionID>
+    </SessionDescriptor>
+    <Transaction>
+      <TransactionDescriptor>
+        <TransactionMode>Request</TransactionMode>
+        <TransactionID/>The Wireless Village initiative: CSP DTD and examples v1.1 WV-023</TransactionDescriptor>
+      <TransactionContent>
+        <Polling-Request/>
+      </TransactionContent>
+    </Transaction>
+  </Session>
+</WV-CSP-Message>

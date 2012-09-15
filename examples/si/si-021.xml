@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE si PUBLIC "-//WAPFORUM//DTD SI 1.0//EN"
+					"file:///home/ricky/NetBeansProjects/wbxml-stream/dtd/si.dtd">
+<si>
+	<indication>
+		si-021
+	</indication>
+	<info>
+		<item class="test1"/>
+		<item class="test2"/>
+		<item class="test3"/>
+	</info>
+</si>

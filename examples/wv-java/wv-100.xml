@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<WV-CSP-Message>
+  <Session>
+    <SessionDescriptor>
+      <SessionType>Inband</SessionType>
+      <SessionID>im.user.com#48815@server.com</SessionID>
+    </SessionDescriptor>
+    <Transaction>
+      <TransactionDescriptor>
+        <TransactionMode>Request</TransactionMode>
+        <TransactionID>IMApp01#12345@NOK5110</TransactionID>
+      </TransactionDescriptor>
+      <TransactionContent>
+        <CreateGroup-Request>
+          <GroupID>wv:john/partygroup@there.com</GroupID>
+          <GroupProperties>
+            <Property>
+              <Name>Name</Name>
+              <Value>Party discussion</Value>
+            </Property>
+            <Property>
+              <Name>Accesstype</Name>
+              <Value>Restricted</Value>
+            </Property>
+            <Property>
+              <Name>PrivateMessaging</Name>
+              <Value>F</Value>
+            </Property>
+            <Property>
+              <Name>Searchable</Name>
+              <Value>T</Value>
+            </Property>
+            <Property>
+              <Name>Topic</Name>
+              <Value>Party</Value>
+            </Property>
+            <Property>
+              <Name>MaxActiveUsers</Name>
+              <Value>30</Value>
+            </Property>
+            <WelcomeNote>
+              <ContentType>text/plain</ContentType>
+              <ContentData>Welcome to WV's party house</ContentData>
+            </WelcomeNote>
+          </GroupProperties>
+          <JoinGroup>T</JoinGroup>
+          <ScreenName>
+            <SName>Jonhhie</SName>
+            <GroupID>wv:thisgroup/group@server.com</GroupID>
+          </ScreenName>
+          <SubscribeNotification>T</SubscribeNotification>
+        </CreateGroup-Request>
+      </TransactionContent>
+    </Transaction>
+  </Session>
+</WV-CSP-Message>

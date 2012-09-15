@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<WV-CSP-Message>
+  <Session>
+    <SessionDescriptor>
+      <SessionType>Inband</SessionType>
+      <SessionID>im.user.com#48815@server.com</SessionID>
+    </SessionDescriptor>
+    <Transaction>
+      <TransactionDescriptor>
+        <TransactionMode>Request</TransactionMode>
+        <TransactionID>IMApp01#12345@NOK5110</TransactionID>
+      </TransactionDescriptor>
+      <TransactionContent>
+        <ListManage-Request>
+          <ContactList>wv:john/My_friends@smith.com</ContactList>
+          <ContactListProperties>
+            <Property>
+              <Name>DisplayName</Name>
+              <Value>My enemies</Value>
+            </Property>
+            <Property>
+              <Name>Default</Name>
+              <Value>T</Value>
+            </Property>
+          </ContactListProperties>
+        </ListManage-Request>
+      </TransactionContent>
+    </Transaction>
+  </Session>
+</WV-CSP-Message>
