@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE WV-CSP-Message PUBLIC "-//OMA//DTD WV-CSP 1.1//EN" "/home/ricky/NetBeansProjects/wbxml-stream/dtd/wv-csp_1_1.dtd">
-<WV-CSP-Message xmlns="http://www.wireless-village.org/CSP1.1">
+<WV-CSP-Message>
    <Session>
       <SessionDescriptor>
          <SessionType>Inband</SessionType>
@@ -15,7 +15,7 @@
             <TransactionID>IMApp01#12347@NOK5110</TransactionID>
          </TransactionDescriptor>
 
-         <TransactionContent xmlns="http://www.wireless-village.org/TRC1.1">
+         <TransactionContent>
             <InviteUser-Response>
                <InviteID>0x38382025</InviteID>
 

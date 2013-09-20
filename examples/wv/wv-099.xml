@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE WV-CSP-Message PUBLIC "-//OMA//DTD WV-CSP 1.1//EN" "/home/ricky/NetBeansProjects/wbxml-stream/dtd/wv-csp_1_1.dtd">
-<WV-CSP-Message xmlns="http://www.wireless-village.org/CSP1.1">
+<WV-CSP-Message>
    <Session>
       <SessionDescriptor>
          <SessionType>Inband</SessionType>
@@ -17,14 +17,14 @@
             <Poll>F</Poll>
          </TransactionDescriptor>
 
-         <TransactionContent xmlns="http://www.wireless-village.org/TRC1.1">
+         <TransactionContent>
             <GetAttributeList-Response>
                <Result>
                   <Code>200</Code>
                </Result>
 
                <DefaultAttributeList>
-                  <PresenceSubList xmlns="http://www.wireless-village.org/PA1.1">
+                  <PresenceSubList>
                      <UserAvailability />
 
                      <StatusMood />
@@ -34,7 +34,7 @@
                <Presence>
                   <UserID>somebody@nowhere.com</UserID>
 
-                  <PresenceSubList xmlns="http://www.wireless-village.org/PA1.1">
+                  <PresenceSubList>
                      <OnlineStatus />
 
                      <UserAvailability />
@@ -48,7 +48,7 @@
                <Presence>
                   <UserID>another_one@nowhere.com</UserID>
 
-                  <PresenceSubList xmlns="http://www.wireless-village.org/PA1.1">
+                  <PresenceSubList>
                      <UserAvailability />
 
                      <StatusMood />
@@ -58,7 +58,7 @@
                <Presence>
                   <ContactList>wv:john/My_friends@smith.com</ContactList>
 
-                  <PresenceSubList xmlns="http://www.wireless-village.org/PA1.1">
+                  <PresenceSubList>
                      <UserAvailability />
 
                      <StatusMood />
@@ -68,7 +68,7 @@
                <Presence>
                   <ContactList>wv:john/My_family@smith.com</ContactList>
 
-                  <PresenceSubList xmlns="http://www.wireless-village.org/PA1.1">
+                  <PresenceSubList>
                      <UserAvailability />
 
                      <StatusMood />

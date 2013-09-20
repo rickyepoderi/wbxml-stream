@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE WV-CSP-Message PUBLIC "-//OMA//DTD WV-CSP 1.1//EN" "/home/ricky/NetBeansProjects/wbxml-stream/dtd/wv-csp_1_1.dtd">
-<WV-CSP-Message xmlns="http://www.wireless-village.org/CSP1.1">
+<WV-CSP-Message>
    <Session>
       <SessionDescriptor>
          <SessionType>Inband</SessionType>
@@ -16,7 +16,7 @@
 
          The Wireless Village initiative: CSP DTD and examples v1.1 WV-023</TransactionDescriptor>
 
-         <TransactionContent xmlns="http://www.wireless-village.org/TRC1.1">
+         <TransactionContent>
             <Polling-Request />
          </TransactionContent>
       </Transaction>

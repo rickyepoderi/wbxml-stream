@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<!DOCTYPE SyncML PUBLIC "-//SYNCML//DTD SyncML 1.1//EN" "file:///home/ricky/NetBeansProjects/wbxml-stream/dtd/OMA-SyncML-RepPro-DTD-V1_1_2-20030505-D.dtd">
-<SyncML xmlns="SYNCML:SYNCML1.1">
+<!DOCTYPE SyncML PUBLIC "-//SYNCML//DTD SyncML 1.1//EN" "http://www.syncml.org/docs/syncml_represent_v11_20020213.dtd">
+<SyncML xmlns='SYNCML:SYNCML1.1'>
     <SyncBody>
         <Sync>
 			<Add>
