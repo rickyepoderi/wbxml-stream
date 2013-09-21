@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class DMDDFTest extends GenericDirectoryTester {
     
     public DMDDFTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/ddf",
+        super("src/test/examples/ddf",
                 WbXmlInitialization.getDefinitionByName("DMDDF 1.2"));
     }
     

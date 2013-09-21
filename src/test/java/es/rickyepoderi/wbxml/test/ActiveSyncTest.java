@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class ActiveSyncTest extends GenericDirectoryTester {
     
     public ActiveSyncTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/activesync",
+        super("src/test/examples/activesync",
                 WbXmlInitialization.getDefinitionByName("ActiveSync"));
     }
     

@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class ConMLTest extends GenericDirectoryTester {
     
     public ConMLTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/conml",
+        super("src/test/examples/conml",
                 WbXmlInitialization.getDefinitionByName("CONML"));
     }
     

@@ -6,7 +6,6 @@ package es.rickyepoderi.wbxml.document.opaque;
 
 import es.rickyepoderi.wbxml.document.OpaqueAttributePlugin;
 import es.rickyepoderi.wbxml.document.WbXmlAttribute;
-import es.rickyepoderi.wbxml.document.WbXmlContent;
 import es.rickyepoderi.wbxml.document.WbXmlElement;
 import es.rickyepoderi.wbxml.document.WbXmlEncoder;
 import es.rickyepoderi.wbxml.document.WbXmlParser;
@@ -106,8 +105,9 @@ public class SiDateTimeOpaque implements OpaqueAttributePlugin {
      * string is cleaned from non digit values and then passed to hex ascii
      * values.
      * @param encoder The encoder which is performing the encoding process
-     * @param element The element which content or attribute is being encoded 
-     * @param content The content (it should be a string content)
+     * @param element The element which attribute is being encoded 
+     * @param attr The attribute which value is being encoded
+     * @param value The value (it should be a string content)
      * @throws IOException Some error writing to the stream
      */
     @Override

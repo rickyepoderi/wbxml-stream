@@ -16,13 +16,14 @@ import java.util.TreeSet;
 
 /**
  *
- * <p>WBXML is a format that assigns several identifiers to differents
+ * <p>WBXML is a format that assigns several identifiers to different
  * elements of an XML (tags, attributes, values,...). This way when you try
  * to parse/encode any WBXML document you need to know the language you
  * are using. That language specification gives you those identifiers. 
  * It is impossible to parse/encode a unknown language specification. This
- * class represents a Java representation of any WBXML language definition.</p>
- * This class is obtained from a properties file which needs to be provided</p>
+ * class represents a Java representation of any WBXML language definition.
+ * This definition is based on a properties file which needs to be 
+ * provided</p>
  * 
  * <p>Basically a language definition is the following list of information
  * (some are optional fields):</p>
@@ -30,9 +31,10 @@ import java.util.TreeSet;
  * <ul>
  * <li>name: A simple name to classify the language (for example SyncML 1.1).</li>
  * <li>publicId: WBXML format defines that each language should have a identifier
- * (numeric).</li>
+ * (numeric). 0x01 represents the unknown language (it does not have a standard 
+ * id).</li>
  * <li>Formal public Id: The formal name of the XML identifier, any XML definition
- * has a FPI (for example SyncML version 1.1 is "-//SYNCML//DTD SyncML 1.1//EN").
+ * has a FPI (for example SyncML version 1.1 is <em>-//SYNCML//DTD SyncML 1.1//EN</em>).
  * This FPI is used in any DOCTYPE.</li>
  * <li>XML URI definition: The URL where the XMl definition for the language 
  * can be obtained (again it appears in any DOCTYPE).</li>
@@ -47,6 +49,9 @@ import java.util.TreeSet;
  * <li>Attribute values: List os attribute values definition tokens.</li>
  * <li>Extensions: List of extensions defined for this language.</li>
  * <li>Opaque plugins: List of opaque plugins used in opaque data representations.</li>
+ * <li>Linked definitions: This is a non standard feature. Some definitions mix
+ * some languages using opaques. This way definitions can have another linked 
+ * ones. The parsing/encoding methods use all of them.</li>
  * </ul>
  * 
  * <p>The properties file is parsed and an object of this kind is created

@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class DevinfTest extends GenericDirectoryTester {
     
     public DevinfTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/devinf",
+        super("src/test/examples/devinf",
                 WbXmlInitialization.getDefinitionByName("DevInf 1.1"));
     }
     

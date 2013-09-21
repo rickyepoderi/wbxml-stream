@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class SyncMLTest extends GenericDirectoryTester {
     
     public SyncMLTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/syncml",
+        super("src/test/examples/syncml",
                 WbXmlInitialization.getDefinitionByName("SyncML 1.1"));
     }
     

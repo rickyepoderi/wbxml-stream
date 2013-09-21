@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class DrmrelTest extends GenericDirectoryTester {
     
     public DrmrelTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/drmrel",
+        super("src/test/examples/drmrel",
                 WbXmlInitialization.getDefinitionByName("drmrel 1.0"));
     }
     

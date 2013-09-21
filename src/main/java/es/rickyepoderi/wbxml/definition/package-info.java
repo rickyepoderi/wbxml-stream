@@ -278,9 +278,60 @@
  * wbxml.opaque.tag.6.DeliveryTime=es.rickyepoderi.wbxml.document.opaque.WVDateTimeOpaque
  * </pre>
  * 
+ * <h4>Linked Definitions</h4>
+ * 
+ * <p>This is a non standard feature. Some languages (like SyncML) has some
+ * tags that contains inside it another WBXML file of another language (devinf
+ * in case of the SyncML language). In order to handle this a new concept 
+ * was added: <em>Linked Defnition</em>. A linked definition is just that,
+ * another definition that can be used inside this definition someway (using
+ * and opaque for sure). This way the parsing/encoding process can know the 
+ * prefix, namespaces and tags that can be appear in any document of the 
+ * language.</p>
+ * 
+ * <p>This properties are only used in SyncML (several versions) definitions.</p>
+ * 
+ * <p>The format is very simple:</p>
+ * 
+ * <pre>
+ * wbxml.opaque.linkeddef.{def_differenciator}={name_of_the_linked_definition}
+ * 
+ * · def_differenciator is just something to link several definitions.
+ * · name_of_the_linked_definition is the name of the linked definition (the
+ *   specified in the linked properties file for that definition.
+ * </pre>
+ * 
+ * <p>For example the <em>SyncML 1.2</em> language uses two linked definitions
+ * in the following way:</p>
+ * 
+ * <pre>
+ * wbxml.opaque.linkeddef.devinf12=DevInf 1.2
+ * wbxml.opaque.linkeddef.dmddf12=DMDDF 1.2
+ * </pre>
+ * 
  * <h3>Initialization</h3>
  * 
- * <p>Very over-elaborated at the moment... Not explained cos it will surely be changed... </p>
+ * <p>The initialization or loading of all the definitions into the JVM is done
+ * at the initialization of the WbXmlInitialization class. There is a location 
+ * where all the properties file should be placed. This location should be 
+ * inside the classpath (it can be a JAR file or normal directory).</p>
+ * 
+ * <p>By default the <em>wbxml-stream</em> contains the default language
+ * definitions in the following path:
+ * <em>es/rickyepoderi/wbxml/definition/defaults</em> 
+ * and they are loaded into the system by default.</p>
+ * 
+ * <p>If it is needed to load different definitions the files should be packed
+ * inside the classpath (inside a JAR or using a directory) and a system
+ * property can be used to denote that this path should be used now instead of 
+ * the default one:</p>
+ * 
+ * <pre>
+ * -Des.rickyepoderi.wbxml.definition.path=new/classpath/resource/path
+ * </pre>
+ * 
+ * <p>Remember that the path is a path inside the classpath, not a file system
+ * path.</p>
  * 
  */
 package es.rickyepoderi.wbxml.definition;

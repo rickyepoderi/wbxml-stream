@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class WVTest extends GenericDirectoryTester {
     
     public WVTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/wv",
+        super("src/test/examples/wv",
                 WbXmlInitialization.getDefinitionByName("WV CSP 1.1"));
     }
     

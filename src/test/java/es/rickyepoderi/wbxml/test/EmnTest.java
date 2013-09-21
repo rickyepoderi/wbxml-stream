@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class EmnTest extends GenericDirectoryTester {
     
     public EmnTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/emn",
+        super("src/test/examples/emn",
                 WbXmlInitialization.getDefinitionByName("EMN 1.0"));
     }
     

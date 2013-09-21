@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class SLTest extends GenericDirectoryTester {
     
     public SLTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/sl",
+        super("src/test/examples/sl",
                 WbXmlInitialization.getDefinitionByName("SL 1.0"));
     }
     

@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class OtaTest  extends GenericDirectoryTester {
     
     public OtaTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/ota",
+        super("src/test/examples/ota",
                 WbXmlInitialization.getDefinitionByName("OTA"));
     }
     

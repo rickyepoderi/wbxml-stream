@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 public class ProvTest extends GenericDirectoryTester {
     
     public ProvTest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/prov",
+        super("src/test/examples/prov",
                 WbXmlInitialization.getDefinitionByName("PROV 1.0"));
     }
     

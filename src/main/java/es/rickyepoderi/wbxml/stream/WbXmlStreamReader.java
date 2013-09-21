@@ -14,7 +14,6 @@ import es.rickyepoderi.wbxml.document.WbXmlParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.logging.Level;
 import java.util.logging.Logger;

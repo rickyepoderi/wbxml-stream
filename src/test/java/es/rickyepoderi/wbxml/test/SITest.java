@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 public class SITest extends GenericDirectoryTester {
     
     public SITest() {
-        super("/home/ricky/NetBeansProjects/wbxml-stream/examples/si",
+        super("src/test/examples/si",
                 WbXmlInitialization.getDefinitionByName("SI 1.0"));
     }
     
