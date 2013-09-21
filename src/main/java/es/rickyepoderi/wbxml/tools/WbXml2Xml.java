@@ -55,7 +55,7 @@ import javax.xml.transform.stream.StreamResult;
  * <ul>
  * <li><p><strong>-j --jaxb</strong>: Use JAXB processing (object representation)
  * instead of normal DOM processing. As it was said JAXB classes are not part 
- * of the <em>eb-xml</em> library.</p></li>
+ * of the <em>wbxml-stream</em> library.</p></li>
  * <li><p><strong>-d --definition</strong>: Use a fixed language definition 
  * for the WBXML file. If no one is provided the command tries to guess it
  * using the public identifier of the WBXML file. But if it is unknown (some

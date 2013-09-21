@@ -55,7 +55,7 @@ import org.w3c.dom.Element;
  * <ul>
  * <li><p><strong>-j --jaxb</strong>: Use JAXB processing (object representation)
  * instead of normal DOM processing. As it was said JAXB classes are not part 
- * of the <em>eb-xml</em> library.</p></li>
+ * of the <em>wbxml-tream</em> library.</p></li>
  * <li><p><strong>-t --type</strong>: The type of use of the string table in
  * the encoding. There are three types: <strong>IF_NEEDED</strong> (default,
  * only use the string table if needed), <strong>ALWAYS</strong> (use for all
@@ -122,7 +122,7 @@ final public class Xml2WbXml {
         sb.append(message);
         sb.append(System.getProperty("line.separator"));
         sb.append(System.getProperty("line.separator"));
-        sb.append("java -cp wbxml-jaxb.jar ");
+        sb.append("java -cp wbxml-jaxb-X.X.X.jar ");
         sb.append(this.getClass().getName());
         sb.append(" [-j --jaxb] [-t --type <TYPE>] [-k --keep] [-d --definition <NAME>] {infile} {outfile}");
         sb.append(System.getProperty("line.separator"));

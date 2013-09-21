@@ -362,19 +362,15 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
     public void writeEmptyElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
         log.log(Level.FINE, "writeEmptyElement({0}, {1}, {2})", 
                 new Object[]{prefix, localName, namespaceURI});
-        throw new UnsupportedOperationException("Not supported yet.");
+        // supposing that you can write a xmlns in an empty tag
+        calculateAndNextTag();
     }
-
+    
     /**
-     * Writes an end tag to the output relying on the internal state of the 
-     * writer to determine the prefix and local name of the event. In the
-     * current implementation it completes the current element with proper
-     * prefix and localName (cos now all the namespaces are correctly set).
-     * @throws XMLStreamException 
+     * Calculates the tag based on current nsctx and advance the current
+     * position to the parent element if parents exist.
      */
-    @Override
-    public void writeEndElement() throws XMLStreamException {
-        log.log(Level.FINE, "writeEndElement()");
+    private void calculateAndNextTag() {
         // at the end of the element all the namespaces are correct
         String localName = current.getElement().getTag();
         String prefix = null;
@@ -412,6 +408,19 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
         } else {
             current = this.parents.pop();
         }
+    }
+
+    /**
+     * Writes an end tag to the output relying on the internal state of the 
+     * writer to determine the prefix and local name of the event. In the
+     * current implementation it completes the current element with proper
+     * prefix and localName (cos now all the namespaces are correctly set).
+     * @throws XMLStreamException 
+     */
+    @Override
+    public void writeEndElement() throws XMLStreamException {
+        log.log(Level.FINE, "writeEndElement()");
+        calculateAndNextTag();
     }
 
     /**
@@ -576,14 +585,14 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
     }
 
     /**
-     * Writes the default namespace to the stream. 
-     * NOTE: Not implemented, throws an exception
+     * Writes the default namespace to the stream.
      * @param namespaceURI the uri to bind the default namespace to
      * @throws XMLStreamException 
      */
     @Override
     public void writeDefaultNamespace(String namespaceURI) throws XMLStreamException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        log.log(Level.FINE, "writeDefaultNamespace({0})", namespaceURI);
+        writeNamespace(XMLConstants.XMLNS_ATTRIBUTE, namespaceURI);
     }
 
     /**
