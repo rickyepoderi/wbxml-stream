@@ -470,9 +470,10 @@ public class WbXmlDefinition {
      * @param value The value to search the string in
      * @param valueToFound The value (correspond from an extension or attribute value) to look for
      * @param start The start point to search (attribute values can start after 0).
+     * @param attr true if attr, false if extension
      * @return The list of splitted strings or null
      */
-    private List<String> matches(String value, String valueToFound, int start) {
+    private List<String> matches(String value, String valueToFound, int start, boolean attr) {
         int pos = value.indexOf(valueToFound, start);
         if (pos >= 0) {
             List<String> result = new ArrayList<String>();
@@ -494,11 +495,19 @@ public class WbXmlDefinition {
                 thirdPart = value.substring(pos + valueToFound.length());
             }
             if (firstPart != null && !firstPart.isEmpty()) {
-                result.addAll(compactAttributeValue(firstPart, start));
+                if (attr) {
+                    result.addAll(compactAttributeValue(firstPart, start));
+                } else {
+                    result.addAll(compactExtension(firstPart, start));
+                }
             }
             result.add(secondPart);
             if (thirdPart != null && !thirdPart.isEmpty()) {
-                result.addAll(compactAttributeValue(thirdPart, 0));
+                if (attr) {
+                    result.addAll(compactAttributeValue(thirdPart, 0));
+                } else {
+                    result.addAll(compactExtension(thirdPart, 0));
+                }
             }
             return result;
         } else {
@@ -527,7 +536,7 @@ public class WbXmlDefinition {
         WbXmlAttributeValueDef valueDef = new WbXmlAttributeValueDef(value.substring(start), (byte) 0x0, (byte) 0x0);
         for (WbXmlAttributeValueDef attrVal : attrValuesByValue.tailSet(valueDef)) {
             //System.err.println("testing... " + attrVal.getValue());
-            List<String> found = matches(value, attrVal.getValue(), start);
+            List<String> found = matches(value, attrVal.getValue(), start, true);
             if (found != null) {
                 return found;
             }
@@ -566,7 +575,7 @@ public class WbXmlDefinition {
         WbXmlExtensionDef extDef = new WbXmlExtensionDef(value.substring(start), (byte) 0x0);
         for (WbXmlExtensionDef ext : extsByValue.tailSet(extDef)) {
             //System.err.println("testing... " + ext.getValue());
-            List<String> found = matches(value, ext.getValue(), start);
+            List<String> found = matches(value, ext.getValue(), start, false);
             if (found != null) {
                 return found;
             }
