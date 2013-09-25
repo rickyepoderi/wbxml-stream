@@ -53,7 +53,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}-${project.version}</Bundle-SymbolicName>
-            <Export-Package>es.rickyepoderi.wbxml.definition,es.rickyepoderi.wbxml.document,es.rickyepoderi.wbxml.document.opaque,es.rickyepoderi.wbxml.stream,es.rickyepoderi.wbxml.tools</Export-Package>
+            <Export-Package>es.rickyepoderi.wbxml.definition,es.rickyepoderi.wbxml.document,es.rickyepoderi.wbxml.document.opaque,es.rickyepoderi.wbxml.stream,es.rickyepoderi.wbxml.stream.events,es.rickyepoderi.wbxml.tools</Export-Package>
           </instructions>
         </configuration>
       </plugin>
