@@ -162,15 +162,22 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
     private boolean skipSpaces = true;
     
     /**
-     * Construtor using all the input values: output stream, language definition,
-     * type of encoding and boolean to set skip spaces or not.
+     * The encoding to use when no specified in the writeStartDocument
+     */
+    private String encoding = null;
+    
+    /**
+     * Constructor using all the input values: output stream, language definition,
+     * type of encoding and boolean to set skip spaces or not and the encoding.
      * @param os The Ouput Stream to write the WBXML to
      * @param def The language definition to use
      * @param encoderType The type of encoding to perform (strtbl use)
      * @param skipSpaces The parser skip spaces or consider them
+     * @param encoding Encoding to use when not specified in start document
      */
     public WbXmlStreamWriter(OutputStream os, WbXmlDefinition def, 
-            WbXmlEncoder.StrtblType encoderType, boolean skipSpaces) {
+            WbXmlEncoder.StrtblType encoderType, boolean skipSpaces,
+            String encoding) {
         this.stream = os;
         this.current = new ElementContext();
         this.current.setContext(new WbXmlNamespaceContext());
@@ -181,6 +188,20 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
         this.def = def;
         this.encoderType = encoderType;
         this.skipSpaces = skipSpaces;
+        this.encoding = encoding;
+    }
+    
+    /**
+     * Constructor using all the input values: output stream, language definition,
+     * type of encoding and boolean to set skip spaces or not.
+     * @param os The Ouput Stream to write the WBXML to
+     * @param def The language definition to use
+     * @param encoderType The type of encoding to perform (strtbl use)
+     * @param skipSpaces The parser skip spaces or consider them
+     */
+    public WbXmlStreamWriter(OutputStream os, WbXmlDefinition def, 
+            WbXmlEncoder.StrtblType encoderType, boolean skipSpaces) {
+        this(os, def, encoderType, skipSpaces, "UTF-8");
     }
     
     /**
@@ -190,7 +211,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
      * @param def The language definition to use
      */
     public WbXmlStreamWriter(OutputStream os, WbXmlDefinition def) {
-        this(os, def, WbXmlEncoder.StrtblType.IF_NEEDED, true);
+        this(os, def, WbXmlEncoder.StrtblType.IF_NEEDED, true, "UTF-8");
     }
     
     /**
@@ -199,7 +220,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
      * @param os The language definition to use
      */
     public WbXmlStreamWriter(OutputStream os) {
-        this(os, null, WbXmlEncoder.StrtblType.IF_NEEDED, true);
+        this(os, null, WbXmlEncoder.StrtblType.IF_NEEDED, true, "UTF-8");
     }
 
     // START DOCUMENT
@@ -211,7 +232,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
     @Override
     public void writeStartDocument() throws XMLStreamException {
         log.fine("writeStartDocument()");
-        writeStartDocument("UTF-8", null);
+        writeStartDocument(this.encoding, null);
     }
 
     /**
@@ -223,7 +244,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
     @Override
     public void writeStartDocument(String version) throws XMLStreamException {
         log.log(Level.FINE, "writeStartDocument({0})", version);
-        writeStartDocument("UTF-8", null);
+        writeStartDocument(this.encoding, null);
     }
 
     /**
@@ -237,6 +258,9 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
     @Override
     public void writeStartDocument(String encoding, String version) throws XMLStreamException {
         log.log(Level.FINE, "writeStartDocument({0}, {1})", new Object[] {encoding, version});
+        if (encoding == null) {
+            encoding = this.encoding;
+        }
         doc = new WbXmlDocument(WbXmlVersion.VERSION_1_3, IanaCharset.getIanaCharset(encoding));
         if (def != null) {
             log.log(Level.FINE, "Setting definition {0}", def.getName());

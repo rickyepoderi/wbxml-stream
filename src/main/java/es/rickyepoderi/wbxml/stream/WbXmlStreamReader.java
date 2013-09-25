@@ -21,6 +21,7 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.stream.Location;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -41,6 +42,14 @@ import javax.xml.stream.XMLStreamReader;
  * marks the content inside the element we are treating). A queue of parent
  * elements is also maintained to iterate over all the elements in document 
  * parsed.</p>
+ * 
+ * <p>Implementing the WbXmlEventReader it was discovered that ATTRIBUTE 
+ * event type should be returned as many times as attributes are in the
+ * element. Currently it is only returned once (it was thought that). Besides
+ * it was discovered that underlaying implentations never use this event. They
+ * when START_ELEMENT is received get all the attributes using getAttributeXXX
+ * methods. For that ATTRIBUTE event type is never returned. Please use
+ * START_ELEMENT instead.</p>
  * 
  * @author ricky
  */
@@ -92,7 +101,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
     }
     
     /**
-     * Constrictor using the parser. This is used when the parser already has
+     * Constructor using the parser. This is used when the parser already has
      * parsed a stream. The constructor set the event type to START:DOCUMENT.
      * @param parser The parser which already has a parsed document inside
      */
@@ -150,6 +159,35 @@ public class WbXmlStreamReader implements XMLStreamReader {
     public WbXmlStreamReader(InputStream is) throws IOException {
         this(is, null);
     }
+    
+    /**
+     * Getter the parser for event readers.
+     * @return The parser used for reading
+     */
+    public WbXmlParser getParser() {
+        return parser;
+    }
+    
+    /**
+     * Getter for the current element being parsed
+     * @return The current element being parsed
+     */
+    public WbXmlElement getCurrentElement() {
+        return this.elementIndex.currentElement;
+    }
+    
+    /**
+     * Getter for the namespace context
+     * @return The namespace context created for the parsing
+     */
+    public WbXmlNamespaceContext getContext() {
+        return this.nsctx;
+    }
+    
+    
+    //
+    // XMLStreamReader methods
+    //
 
     /**
      * Returns true if the cursor points to a character data event. In the
@@ -191,17 +229,17 @@ public class WbXmlStreamReader implements XMLStreamReader {
     public boolean isWhiteSpace() {
         log.log(Level.FINE, "isWhiteSpace():");
         if (event == CHARACTERS) {
-            boolean result = true;
             char[] ch = getTextCharacters();
             final int start = this.getTextStart();
             final int end = start + this.getTextLength();
             for (int i = start; i < end; i++) {
                 if (!XMLChar.isSpace(ch[i])) {
-                    result = false;
+                    log.log(Level.FINE, "isWhiteSpace(): {0}", false);
+                    return false;
                 }
             }
-            log.log(Level.FINE, "isWhiteSpace(): {0}", result);
-            return result;
+            log.log(Level.FINE, "isWhiteSpace(): {0}", true);
+            return true;
         } else {
             throw new IllegalStateException("Not in CHARACTERS state");
         }
@@ -209,17 +247,18 @@ public class WbXmlStreamReader implements XMLStreamReader {
 
     /**
      * Returns a boolean which indicates if this attribute was created by default.
-     * NOTE: This method always returns false (I think I don't understand it very well).
+     * It returns true if current element has an attribute at this index
      * @param index the position of the attribute
      * @return true if this is a default attribute
      */
     @Override
     public boolean isAttributeSpecified(int index) {
         log.log(Level.FINE, "isAttributeSpecified({0})", index);
-        if (event != ATTRIBUTE) {
+        if (event != ATTRIBUTE && event != START_ELEMENT) {
             throw new IllegalStateException("isAttributeSpecified called in another state!");
+        } else {
+            return elementIndex.currentElement.attributesSize() > index;
         }
-        return false;
     }
     
     /**
@@ -319,7 +358,8 @@ public class WbXmlStreamReader implements XMLStreamReader {
         } else if (event == START_ELEMENT) {
             // the next can be END_ELEMENT, ATTRIBUTE, CAHARACTERS, PROCESSING_INSTRUCTION
             elementIndex.index = 0;
-            event = nextInElement(true);
+            // Never return ATTRIBUTE
+            event = nextInElement(false);
         } else if (event == ATTRIBUTE) {
             // the nest event can be CHARACTERS PROCESSING_INSTRUCTION
             elementIndex.index = 0;
@@ -364,7 +404,12 @@ public class WbXmlStreamReader implements XMLStreamReader {
     @Override
     public Object getProperty(String name) throws IllegalArgumentException {
         log.log(Level.FINE, "getProperty({0})", name);
-        return null;
+        if (XMLInputFactory.IS_NAMESPACE_AWARE.equals(name)) {
+            // is namespace aware if namespaces are defined
+            return this.parser.getDefinition().getNamespaces().size() > 0;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -461,7 +506,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
             eventType = next();
         }
         if (eventType != START_ELEMENT && eventType != END_ELEMENT) {
-            throw new XMLStreamException("expected start or end tag");
+            throw new XMLStreamException(String.format("expected start or end tag and found %d", eventType));
         }
         log.log(Level.FINE, "nextTag(): {0}", eventType);
         return eventType;
@@ -1020,22 +1065,22 @@ public class WbXmlStreamReader implements XMLStreamReader {
 
     /**
      * Get the standalone declaration from the xml declaration.
-     * NOTE: Unsupported, it throws and exception
+     * It always return false.
      * @return true if standalone was set in the document, or false otherwise
      */
     @Override
     public boolean isStandalone() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return false;
     }
 
     /**
      * Checks if standalone was set in the document.
-     * NOTE: Unsupported, it throws and exception
+     * It always return false.
      * @return true if standalone was set in the document, or false otherwise
      */
     @Override
     public boolean standaloneSet() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return false;
     }
 
     /**

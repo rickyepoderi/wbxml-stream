@@ -7,7 +7,7 @@ package es.rickyepoderi.wbxml.tools;
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
 import es.rickyepoderi.wbxml.definition.WbXmlInitialization;
 import es.rickyepoderi.wbxml.document.WbXmlEncoder;
-import es.rickyepoderi.wbxml.stream.WbXmlStreamWriter;
+import es.rickyepoderi.wbxml.stream.WbXmlOutputFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,6 +18,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLEventWriter;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -56,6 +58,8 @@ import org.w3c.dom.Element;
  * <li><p><strong>-j --jaxb</strong>: Use JAXB processing (object representation)
  * instead of normal DOM processing. As it was said JAXB classes are not part 
  * of the <em>wbxml-tream</em> library.</p></li>
+ * <li><p><strong>-e --event</strong>: Use the event writer instead of common
+ * stream writer implementation.</p></li>
  * <li><p><strong>-t --type</strong>: The type of use of the string table in
  * the encoding. There are three types: <strong>IF_NEEDED</strong> (default,
  * only use the string table if needed), <strong>ALWAYS</strong> (use for all
@@ -110,8 +114,21 @@ final public class Xml2WbXml {
      * The definition to use in the conversion.
      */
     private WbXmlDefinition def = null;
+    
+    /**
+     * type of encoding.
+     */
     private WbXmlEncoder.StrtblType type = WbXmlEncoder.StrtblType.IF_NEEDED;
+    
+    /**
+     * skip spaces.
+     */
     private boolean skipSpaces = true;
+    
+    /**
+     * Use event writer.
+     */
+    private boolean event = false;
     
     /**
      * It prints the usage of the command and the throws a IllegalArgumentException.
@@ -127,6 +144,8 @@ final public class Xml2WbXml {
         sb.append(" [-j --jaxb] [-t --type <TYPE>] [-k --keep] [-d --definition <NAME>] {infile} {outfile}");
         sb.append(System.getProperty("line.separator"));
         sb.append("       -j --jaxb: Use JAXB instead instead default DOM");
+        sb.append(System.getProperty("line.separator"));
+        sb.append("      -e --event: Use XMLEventWriter instead of the default XMLStreamWriter");
         sb.append(System.getProperty("line.separator"));
         sb.append("                  In order to use JAXB the classes should be generated from the DTD (xjc)");
         sb.append(System.getProperty("line.separator"));
@@ -188,6 +207,9 @@ final public class Xml2WbXml {
             } else if ("-j".equals(args[i]) || "--jaxb".equals(args[i])) {
                 // use JAXB instead DOM
                 this.useDom = false;
+            } else if ("-e".equals(args[i]) || "--event".equals(args[i])) {
+                // Use the XMLEventWriter
+                this.event = true;
             } else if ("-t".equals(args[i]) || "--type".equals(args[i])) {
                 // the type of encoding
                 String name = getNext(args, ++i);
@@ -240,6 +262,7 @@ final public class Xml2WbXml {
      */
     private void process() throws Exception {
         XMLStreamWriter xmlStreamWriter = null;
+        XMLEventWriter xmlEventWriter = null;
         try {
             // weird parameters for xerces:
             // http://xerces.apache.org/xerces2-j/features.html#namespaces
@@ -267,6 +290,11 @@ final public class Xml2WbXml {
                     }
                 }
             }
+            // create the factory
+            XMLOutputFactory fact = new WbXmlOutputFactory();
+            fact.setProperty(WbXmlOutputFactory.DEFINITION_PROPERTY, def);
+            fact.setProperty(WbXmlOutputFactory.ENCODING_TYPE_PROPERTY, type);
+            fact.setProperty(WbXmlOutputFactory.SKIP_SPACES_PROPERTY, skipSpaces);
             if (!useDom) {
                 // use JAXB
                 String clazz = def.getClazz();
@@ -277,20 +305,34 @@ final public class Xml2WbXml {
                 JAXBContext jc = JAXBContext.newInstance(Class.forName(clazz));
                 Unmarshaller unmarshaller = jc.createUnmarshaller();
                 Object obj = unmarshaller.unmarshal(doc);
-                xmlStreamWriter = new WbXmlStreamWriter(out, def, type, skipSpaces);
                 Marshaller marshaller = jc.createMarshaller();
-                marshaller.marshal(obj, xmlStreamWriter);
+                if (event) {
+                    xmlEventWriter = fact.createXMLEventWriter(out);
+                    marshaller.marshal(obj, xmlEventWriter);
+                } else {
+                    xmlStreamWriter = fact.createXMLStreamWriter(out);
+                    marshaller.marshal(obj, xmlStreamWriter);
+                }
             } else {
                 // use common DOM processing
                 Transformer xformer = TransformerFactory.newInstance().newTransformer();
-                xmlStreamWriter = new WbXmlStreamWriter(out, def, type, skipSpaces);
                 Source domSource = new DOMSource(doc);
-                StAXResult staxResult = new StAXResult(xmlStreamWriter);
+                StAXResult staxResult;
+                if (event) {
+                    xmlEventWriter = fact.createXMLEventWriter(out);
+                    staxResult = new StAXResult(xmlEventWriter);
+                } else {
+                    xmlStreamWriter = fact.createXMLStreamWriter(out);
+                    staxResult = new StAXResult(xmlStreamWriter);
+                }
                 xformer.transform(domSource, staxResult);
             }
         } finally {
             if (xmlStreamWriter != null) {
                 try {xmlStreamWriter.close();} catch (Exception e) {}
+            }
+            if (xmlEventWriter != null) {
+                try {xmlEventWriter.close();} catch (Exception e) {}
             }
         }
     }

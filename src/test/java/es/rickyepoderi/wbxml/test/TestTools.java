@@ -6,6 +6,8 @@ import es.rickyepoderi.wbxml.stream.WbXmlStreamReader;
 import es.rickyepoderi.wbxml.stream.WbXmlStreamWriter;
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
 import es.rickyepoderi.wbxml.document.WbXmlEncoder;
+import es.rickyepoderi.wbxml.stream.WbXmlEventReader;
+import es.rickyepoderi.wbxml.stream.WbXmlEventWriter;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,6 +25,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.transform.OutputKeys;
@@ -33,6 +36,7 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stax.StAXResult;
 import javax.xml.transform.stax.StAXSource;
+import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 
 /*
@@ -198,7 +202,7 @@ public class TestTools {
         marshaller = jc.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         marshaller.marshal(syncRes, System.err);*/
-        
+        /*
         // read the XML file using DOM
         InputStream in = new FileInputStream("/home/ricky/syncml.xml");
         DocumentBuilderFactory domFact = DocumentBuilderFactory.newInstance();
@@ -220,6 +224,40 @@ public class TestTools {
         StAXResult staxResult = new StAXResult(xmlStreamWriter);
         xformer.transform(domSource, staxResult);
         out.close();
+        */
+        
+        
+        // read a WBXML file using DOM
+        InputStream in = new FileInputStream("/home/ricky/lala.wbxml");
+        XMLEventReader xmlEventReader = new WbXmlEventReader(in, null);
+        StAXSource staxSource = new StAXSource(xmlEventReader);
+        StreamResult result = new StreamResult(System.out);
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+        transformer.transform(staxSource, result); 
+        
+        /*
+        InputStream in = new FileInputStream("/home/ricky/lala.xml");
+        DocumentBuilderFactory domFact = DocumentBuilderFactory.newInstance();
+        domFact.setNamespaceAware(true);
+        domFact.setIgnoringElementContentWhitespace(true);
+        domFact.setCoalescing(true);
+        domFact.setIgnoringComments(true);
+        domFact.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        DocumentBuilder domBuilder = domFact.newDocumentBuilder();
+        Document doc = domBuilder.parse(in);
+        doc.normalizeDocument();
+        // write a WBXML into a ByteArray
+        WbXmlDefinition definition = WbXmlInitialization.getDefinitionByName(
+                "ActiveSync");
+        FileOutputStream out = new FileOutputStream("/home/ricky/lala.wbxml");
+        WbXmlEventWriter xmlEventWriter = new WbXmlEventWriter(out, definition, WbXmlEncoder.StrtblType.IF_NEEDED, true);
+        Transformer xformer = TransformerFactory.newInstance().newTransformer();
+        Source domSource = new DOMSource(doc);
+        StAXResult staxResult = new StAXResult(xmlEventWriter);
+        xformer.transform(domSource, staxResult);
+        out.close();*/
     }
  
 }

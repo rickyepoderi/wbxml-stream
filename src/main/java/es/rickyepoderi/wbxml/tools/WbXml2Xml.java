@@ -7,6 +7,8 @@ package es.rickyepoderi.wbxml.tools;
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
 import es.rickyepoderi.wbxml.definition.WbXmlInitialization;
 import es.rickyepoderi.wbxml.document.WbXmlParser;
+import es.rickyepoderi.wbxml.stream.WbXmlEventReader;
+import es.rickyepoderi.wbxml.stream.WbXmlInputFactory;
 import es.rickyepoderi.wbxml.stream.WbXmlStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +18,8 @@ import java.io.OutputStream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
@@ -56,6 +60,8 @@ import javax.xml.transform.stream.StreamResult;
  * <li><p><strong>-j --jaxb</strong>: Use JAXB processing (object representation)
  * instead of normal DOM processing. As it was said JAXB classes are not part 
  * of the <em>wbxml-stream</em> library.</p></li>
+ * <li><p><strong>-e --event</strong>: Use the event reader instead of common
+ * stream reader implementation.</p></li>
  * <li><p><strong>-d --definition</strong>: Use a fixed language definition 
  * for the WBXML file. If no one is provided the command tries to guess it
  * using the public identifier of the WBXML file. But if it is unknown (some
@@ -109,6 +115,11 @@ final public class WbXml2Xml {
     private WbXmlDefinition def = null;
     
     /**
+     * Use XMLEventReader.
+     */
+    private boolean event = false;
+    
+    /**
      * It prints the usage of the command and the throws a IllegalArgumentException.
      * @param message The message to show previous of the usage part
      */
@@ -122,6 +133,8 @@ final public class WbXml2Xml {
         sb.append(" [-j --jaxb] [-d --definition <NAME>] {infile} {outfile}");
         sb.append(System.getProperty("line.separator"));
         sb.append("       -j --jaxb: Use JAXB instead instead default DOM");
+        sb.append(System.getProperty("line.separator"));
+        sb.append("      -e --event: Use XMLEventWriter instead of the default XMLStreamWriter");
         sb.append(System.getProperty("line.separator"));
         sb.append("                  In order to use JAXB the classes should be generated from the DTD (xjc)");
         sb.append(System.getProperty("line.separator"));
@@ -176,6 +189,9 @@ final public class WbXml2Xml {
                 if (this.def == null) {
                     usage(String.format("Invalid definition specified '%s'.", defName));
                 }
+            } else if ("-e".equals(args[i]) || "--event".equals(args[i])) {
+                // Use the XMLEventWriter
+                this.event = true;
             } else if ("-j".equals(args[i]) || "--jaxb".equals(args[i])) {
                 // use JAXB instead DOM
                 this.useDom = false;
@@ -219,10 +235,18 @@ final public class WbXml2Xml {
      */
     private void process() throws Exception {
         XMLStreamReader xmlStreamReader = null;
+        XMLEventReader xmlEventReader = null;
+        XMLInputFactory fact = new WbXmlInputFactory();
+        fact.setProperty(WbXmlInputFactory.DEFINITION_PROPERTY, def);
         try {
-            WbXmlParser parser = new WbXmlParser(in);
-            parser.parse(def);
-            xmlStreamReader = new WbXmlStreamReader(parser);
+            WbXmlParser parser;
+            if (event) {
+                xmlEventReader = fact.createXMLEventReader(in);
+                parser = ((WbXmlEventReader) xmlEventReader).getParser();
+            } else {
+                xmlStreamReader = fact.createXMLStreamReader(in);
+                parser = ((WbXmlStreamReader) xmlStreamReader).getParser();
+            }
             if (!useDom) {
                 String clazz = parser.getDefinition().getClazz();
                 if (clazz == null || clazz.isEmpty()) {
@@ -231,7 +255,12 @@ final public class WbXml2Xml {
                 }
                 JAXBContext jc = JAXBContext.newInstance(Class.forName(clazz));
                 Unmarshaller unmarshaller = jc.createUnmarshaller();
-                Object obj = unmarshaller.unmarshal(xmlStreamReader);
+                Object obj;
+                if (event) {
+                    obj = unmarshaller.unmarshal(xmlEventReader);
+                } else {
+                    obj = unmarshaller.unmarshal(xmlStreamReader);
+                }
                 Marshaller marshaller = jc.createMarshaller();
                 marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
                 if (parser.getDefinition().getXmlPublicId() != null
@@ -254,7 +283,12 @@ final public class WbXml2Xml {
                 }
                 xformer.setOutputProperty(OutputKeys.INDENT, "yes");
                 xformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-                StAXSource staxSource = new StAXSource(xmlStreamReader);
+                StAXSource staxSource;
+                if (event) {
+                    staxSource = new StAXSource(xmlEventReader);
+                } else {
+                    staxSource = new StAXSource(xmlStreamReader);
+                }
                 DOMResult domResult = new DOMResult();
                 xformer.transform(staxSource, domResult);
                 Source domSource = new DOMSource(domResult.getNode(), domResult.getSystemId());
@@ -264,6 +298,9 @@ final public class WbXml2Xml {
         } finally {
             if (xmlStreamReader != null) {
                 try {xmlStreamReader.close();} catch (Exception e) {}
+            }
+            if (xmlEventReader != null) {
+                try {xmlEventReader.close();} catch (Exception e) {}
             }
         }
     }
