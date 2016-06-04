@@ -313,9 +313,9 @@ public class WbXmlStreamReader implements XMLStreamReader {
                 elementIndex.currentElement.contentsSize() > elementIndex.index) {
             // get the index content and guess event type
             WbXmlContent content = elementIndex.currentElement.getContent(elementIndex.index);
-            if (content.isEntity()) {
-                event = ENTITY_REFERENCE;
-            } else if (content.isString()) {
+            if (content.isString()) {
+                // a character entity is now considered as CHARACTERS cos in
+                // Java a numeric character entity is transformed into text
                 event = CHARACTERS;
             } else if (content.isPi()) {
                 event = PROCESSING_INSTRUCTION;

@@ -35,6 +35,7 @@
  */
 package es.rickyepoderi.wbxml.document;
 
+import com.sun.org.apache.xerces.internal.util.XMLChar;
 import es.rickyepoderi.wbxml.definition.IanaCharset;
 import es.rickyepoderi.wbxml.definition.WbXmlAttributeDef;
 import es.rickyepoderi.wbxml.definition.WbXmlAttributeValueDef;
@@ -291,6 +292,11 @@ public class WbXmlParser {
      */
     public void readSwitchPageAttribute() throws IOException {
         if (WbXmlLiterals.SWTICH_PAGE == currentByte) {
+            if (doc.getVersion().lessThan(WbXmlVersion.VERSION_1_2)) {
+                // the switch page is added in version 1.2
+                throw new IOException(String.format("Version %s cannot manage switch page (attribute)",
+                        doc.getVersion().getVersion()));
+            }
             read();
             this.pageAttrState = currentByte;
             read();
@@ -320,6 +326,11 @@ public class WbXmlParser {
      */
     public void readSwitchPageTag() throws IOException {
         if (WbXmlLiterals.SWTICH_PAGE == currentByte) {
+            if (doc.getVersion().lessThan(WbXmlVersion.VERSION_1_2)) {
+                // the switch page is added in version 1.2
+                throw new IOException(String.format("Version %s cannot manage switch page (tag)",
+                        doc.getVersion().getVersion()));
+            }
             read();
             this.pageTagState = currentByte;
             read();
@@ -412,7 +423,11 @@ public class WbXmlParser {
      * @throws IOException Some error reading the stream or unknown IANA charset
      */
     public IanaCharset parseCharset() throws IOException {
-        long mib = readUnsignedInteger();
+        long mib = IanaCharset.UNKNOWN.getMibEnum();
+        if (doc.getVersion().greaterThan(WbXmlVersion.VERSION_1_0)) {
+            // version 1.0 does not manage charsets (always unknown)
+            mib = readUnsignedInteger();
+        }
         IanaCharset iana = IanaCharset.getIanaCharset(mib);
         if (mib != 0 && iana.equals(IanaCharset.UNKNOWN)) {
             throw new IOException(String.format("Unknown character encoding '%d'", mib));
@@ -486,6 +501,11 @@ public class WbXmlParser {
      * @throws IOException Some error reading the stream or locating/executing the plugin
      */
     public WbXmlContent parseOpaqueTag(String tagName) throws IOException {
+        if (doc.getVersion().lessThan(WbXmlVersion.VERSION_1_1)) {
+            // opaque for content is defined in 1.1
+            throw new IOException(String.format("Version %s cannot manage opaques for content",
+                    doc.getVersion().getVersion()));
+        }
         // first get the plugin for the attr
         OpaqueContentPlugin plugin = doc.getDefinition().locateTagPlugin(tagName);
         if (plugin == null) {
@@ -535,6 +555,11 @@ public class WbXmlParser {
      * @throws IOException Some error reading the stream or locating/executing the plugin
      */
     public String parseOpaqueAttr(String attrName) throws IOException {
+        if (doc.getVersion().lessThan(WbXmlVersion.VERSION_1_2)) {
+            // opaque for attributes is defined in 1.2
+            throw new IOException(String.format("Version %s cannot manage opaques for content",
+                    doc.getVersion().getVersion()));
+        }
         // first get the plugin for the attr
         OpaqueAttributePlugin plugin = doc.getDefinition().locateAttrPlugin(attrName);
         if (plugin == null) {
@@ -580,9 +605,18 @@ public class WbXmlParser {
         if (WbXmlLiterals.ENTITY != currentByte) {
             throw new IOException("Entity must start with the ENTITY tag!");
         }
-        // read the numeric entity and construct the "&#" + num + ";"
-        long entity = readUnsignedInteger();
-        return new StringBuilder("&#").append(entity).append(";").toString();
+        // it seems that java read the entity char and constructs the
+        // string in java, so int is used instead of long
+        int entity = (int) readUnsignedInteger();
+        StringBuilder buf = new StringBuilder();
+        if (!XMLChar.isSupplemental(entity)) {
+            buf.append((char) entity);
+        } else {
+            // character is supplemental, split it into surrogate chars
+            buf.append(XMLChar.highSurrogate(entity));
+            buf.append(XMLChar.lowSurrogate(entity));
+        }
+        return buf.toString();
     }
     
     /**

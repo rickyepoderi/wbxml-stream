@@ -38,12 +38,15 @@ package es.rickyepoderi.wbxml.tools;
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
 import es.rickyepoderi.wbxml.definition.WbXmlInitialization;
 import es.rickyepoderi.wbxml.document.WbXmlEncoder;
+import es.rickyepoderi.wbxml.document.WbXmlVersion;
 import es.rickyepoderi.wbxml.stream.WbXmlOutputFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -52,6 +55,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -98,10 +102,14 @@ import org.w3c.dom.Element;
  * problems if the encoding needs it).</p></li>
  * <li><p><strong>-k --keep</strong>: Keep the spaces in the values (by
  * default all the string are trimmed).</p></li>
+ * <li><p><strong>-v --version</strong>: WBXML version to use: 1.0, 1.1, 1.2, 
+ * 1.3 (default).</p></li>
+ * <li><p><strong>-c --charset</strong>: Java charset to encode the WbXML 
+ * document (default: UTF-8)</p></li>
  * <li><p><strong>-d --definition</strong>: Use a fixed language definition 
  * for the WBXML file. If no one is provided the command tries to guess it
  * using the public identifier of the WBXML file. But if it is unknown (some
- * languages are nor standardized, like Microsoft ActiveSync) and no definition 
+ * languages are not standardized, like Microsoft ActiveSync) and no definition 
  * is provided an error is reported.</p>
  * <p>A list of possible language definitions is shown in the usage of the 
  * command.</p></li>
@@ -162,6 +170,16 @@ final public class Xml2WbXml {
     private boolean event = false;
     
     /**
+     * WBXML version to use in the document.
+     */
+    private WbXmlVersion version = WbXmlVersion.VERSION_1_3;
+    
+    /**
+     * The default charset to use in the encoding.
+     */
+    private Charset charset = Charset.forName("UTF-8");
+    
+    /**
      * It prints the usage of the command and the throws a IllegalArgumentException.
      * @param message The message to show previous of the usage part
      */
@@ -183,6 +201,10 @@ final public class Xml2WbXml {
         sb.append("       -t --type: Type of STR table use. Values: IF_NEEDED (default), ALWAYS, NO");
         sb.append(System.getProperty("line.separator"));
         sb.append("       -k --keep: Keep spaces from the XML (default no)");
+        sb.append(System.getProperty("line.separator"));
+        sb.append("    -v --version: WBXML version to use: 1.0, 1.1, 1.2, 1.3 (default)");
+        sb.append(System.getProperty("line.separator"));
+        sb.append("    -c --charset: Java charset to encode the WbXML document (default: UTF-8)");
         sb.append(System.getProperty("line.separator"));
         sb.append(" -d --definition: Force definition instead deriving from XML. Current definitions:");
         sb.append(System.getProperty("line.separator"));
@@ -252,9 +274,21 @@ final public class Xml2WbXml {
             } else if ("-k".equals(args[i]) || "--keep".equals(args[i])) {
                 // use JAXB instead DOM
                 this.skipSpaces = false;
+            } else if ("-v".equals(args[i]) || "--version".equals(args[i])) {
+                String v = getNext(args, ++i);
+                this.version = WbXmlVersion.locateVersion(v);
+                if (this.version == null) {
+                    usage(String.format("Invalid version '%s'. Version should be 1.0, 1.1, 1.2 or 1.3.", v));
+                }
+            } else if ("-c".equals(args[i]) || "--charset".equals(args[i])) {
+                String name = getNext(args, ++i);
+                try {
+                    this.charset = Charset.forName(name);
+                } catch (UnsupportedCharsetException e) {
+                    usage(String.format("Unsupported charset '%s'.", name));
+                }
             } else {
                 if (args.length - i != 2) {
-                    System.err.println(args.length - i);
                     usage("Invalid invocation.");
                 }
                 // the names of the infile and outfile
@@ -326,6 +360,7 @@ final public class Xml2WbXml {
             fact.setProperty(WbXmlOutputFactory.DEFINITION_PROPERTY, def);
             fact.setProperty(WbXmlOutputFactory.ENCODING_TYPE_PROPERTY, type);
             fact.setProperty(WbXmlOutputFactory.SKIP_SPACES_PROPERTY, skipSpaces);
+            fact.setProperty(WbXmlOutputFactory.VERSION_PROPERTY, version);
             if (!useDom) {
                 // use JAXB
                 String clazz = def.getClazz();
@@ -338,22 +373,23 @@ final public class Xml2WbXml {
                 Object obj = unmarshaller.unmarshal(doc);
                 Marshaller marshaller = jc.createMarshaller();
                 if (event) {
-                    xmlEventWriter = fact.createXMLEventWriter(out);
+                    xmlEventWriter = fact.createXMLEventWriter(out, charset.name());
                     marshaller.marshal(obj, xmlEventWriter);
                 } else {
-                    xmlStreamWriter = fact.createXMLStreamWriter(out);
+                    xmlStreamWriter = fact.createXMLStreamWriter(out, charset.name());
                     marshaller.marshal(obj, xmlStreamWriter);
                 }
             } else {
                 // use common DOM processing
                 Transformer xformer = TransformerFactory.newInstance().newTransformer();
+                xformer.setOutputProperty(OutputKeys.ENCODING, charset.name());
                 Source domSource = new DOMSource(doc);
                 StAXResult staxResult;
                 if (event) {
-                    xmlEventWriter = fact.createXMLEventWriter(out);
+                    xmlEventWriter = fact.createXMLEventWriter(out, charset.name());
                     staxResult = new StAXResult(xmlEventWriter);
                 } else {
-                    xmlStreamWriter = fact.createXMLStreamWriter(out);
+                    xmlStreamWriter = fact.createXMLStreamWriter(out, charset.name());
                     staxResult = new StAXResult(xmlStreamWriter);
                 }
                 xformer.transform(domSource, staxResult);

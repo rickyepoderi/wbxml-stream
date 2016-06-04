@@ -627,7 +627,7 @@ public class WbXmlInitialization {
                     resourcePath));
         }
         if (resource.getProtocol().equals("jar")) {
-            loadPropertiesJar(resource, DEFAULT_RESOURCE_DIRECTORY);
+            loadPropertiesJar(resource, resourcePath);
             processLinkedDefinitions();
         } else if (resource.getProtocol().equals("file")) {
             loadPropertiesFile(new File(resource.getFile()));
@@ -721,6 +721,23 @@ public class WbXmlInitialization {
     static synchronized public void reload() {
         definitions.clear();
         init();
+    }
+    
+    /**
+     * Method to add programmatically a new definition to the static list of
+     * definitions.
+     * @param props The properties file of the definition
+     */
+    static synchronized public void addDefinition(Properties props) {
+        String name = props.getProperty(PROP_WBXML_NAME);
+        if (name == null) {
+            throw new NullPointerException("The specification should have a name");
+        }
+        WbXmlDefinition def = getDefinitionByName(name);
+        if (def != null) {
+            throw new IllegalStateException(String.format("There is another specification with the name '%s'", name));
+        }
+        definitions.add(loadDefinition(props)); 
     }
     
     //

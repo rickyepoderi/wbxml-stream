@@ -73,7 +73,7 @@ import javax.xml.stream.XMLStreamWriter;
  * document is encoded in the real output stream. So only in-memory processing
  * is done until the final method.</p>
  * 
- * <p>Currently the output stream has two possibilities:</p>
+ * <p>Currently the output stream has the following possibilities:</p>
  * 
  * <ul>
  * <li>encoderType: This encoder is the same that the WbXmlEncoder uses. This
@@ -83,6 +83,9 @@ import javax.xml.stream.XMLStreamWriter;
  * <li>skipSpaces: if true values which are completely blank spaces are not
  * considered, and real values are trimmed (start and end). if false all
  * contents are written to the WBXML. "true" by default.</li>
+ * <li>definition: The definition to use for the WBXML document.</li>
+ * <li>version: The version of the WBXML document to produce.</li>
+ * <li>encoding: The encoding to use in the WBXML document.</li>
  * </ul>
  * 
  * TODO: Why about create properties to the parser and reader!!!
@@ -198,6 +201,11 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
     private String encoding = null;
     
     /**
+     * The WBXML version to use for encoding
+     */
+    private WbXmlVersion version = null;
+    
+    /**
      * Constructor using all the input values: output stream, language definition,
      * type of encoding and boolean to set skip spaces or not and the encoding.
      * @param os The Ouput Stream to write the WBXML to
@@ -205,10 +213,11 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
      * @param encoderType The type of encoding to perform (strtbl use)
      * @param skipSpaces The parser skip spaces or consider them
      * @param encoding Encoding to use when not specified in start document
+     * @param version The WBXML version to use for encoding
      */
     public WbXmlStreamWriter(OutputStream os, WbXmlDefinition def, 
             WbXmlEncoder.StrtblType encoderType, boolean skipSpaces,
-            String encoding) {
+            String encoding, WbXmlVersion version) {
         this.stream = os;
         this.current = new ElementContext();
         this.current.setContext(new WbXmlNamespaceContext());
@@ -220,6 +229,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
         this.encoderType = encoderType;
         this.skipSpaces = skipSpaces;
         this.encoding = encoding;
+        this.version = version;
     }
     
     /**
@@ -232,7 +242,21 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
      */
     public WbXmlStreamWriter(OutputStream os, WbXmlDefinition def, 
             WbXmlEncoder.StrtblType encoderType, boolean skipSpaces) {
-        this(os, def, encoderType, skipSpaces, "UTF-8");
+        this(os, def, encoderType, skipSpaces, "UTF-8", WbXmlVersion.VERSION_1_3);
+    }
+    
+    /**
+     * Constructor using all the input values: output stream, language definition,
+     * type of encoding and boolean to set skip spaces or not.
+     * @param os The Ouput Stream to write the WBXML to
+     * @param def The language definition to use
+     * @param encoderType The type of encoding to perform (strtbl use)
+     * @param skipSpaces The parser skip spaces or consider them
+     * @param version The WBXML version to use for encoding
+     */
+    public WbXmlStreamWriter(OutputStream os, WbXmlDefinition def, 
+            WbXmlEncoder.StrtblType encoderType, boolean skipSpaces, WbXmlVersion version) {
+        this(os, def, encoderType, skipSpaces, "UTF-8", version);
     }
     
     /**
@@ -242,7 +266,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
      * @param def The language definition to use
      */
     public WbXmlStreamWriter(OutputStream os, WbXmlDefinition def) {
-        this(os, def, WbXmlEncoder.StrtblType.IF_NEEDED, true, "UTF-8");
+        this(os, def, WbXmlEncoder.StrtblType.IF_NEEDED, true, "UTF-8", WbXmlVersion.VERSION_1_3);
     }
     
     /**
@@ -251,7 +275,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
      * @param os The language definition to use
      */
     public WbXmlStreamWriter(OutputStream os) {
-        this(os, null, WbXmlEncoder.StrtblType.IF_NEEDED, true, "UTF-8");
+        this(os, null, WbXmlEncoder.StrtblType.IF_NEEDED, true, "UTF-8", WbXmlVersion.VERSION_1_3);
     }
 
     // START DOCUMENT
@@ -291,8 +315,10 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
         log.log(Level.FINE, "writeStartDocument({0}, {1})", new Object[] {encoding, version});
         if (encoding == null) {
             encoding = this.encoding;
+        } else {
+            this.encoding = encoding;
         }
-        doc = new WbXmlDocument(WbXmlVersion.VERSION_1_3, IanaCharset.getIanaCharset(encoding));
+        doc = new WbXmlDocument(this.version, IanaCharset.getIanaCharset(encoding));
         if (def != null) {
             log.log(Level.FINE, "Setting definition {0}", def.getName());
             doc.setDefinition(def);
@@ -735,15 +761,28 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
     }
 
     /**
-     * Writes an entity reference.
-     * NOTE: Not implemented, it should write the reference char or the
-     * real data corresponding to the entity (WBXML only admits numeric entities).
-     * @param name the name of the entity
-     * @throws XMLStreamException 
+     * Writes an entity reference. In the WbXML specification only numeric 
+     * entity references "#[0-9]+" or "#x[0-9a-fA-F]+" are allowed.
+     * @param name the name of the entity - numeric char in case of WBXML
+     * @throws XMLStreamException Some error
      */
     @Override
     public void writeEntityRef(String name) throws XMLStreamException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        log.log(Level.FINE, "writeEntityRef({0})", name);
+        // TODO: I don't know how to write a entity ref in an attribute with StAX
+        //       I think that it is not possible (nothing in writeAttribute)
+        long number = 0L;
+        if (name.matches("^#[0-9]+$")) {
+            number = Long.parseLong(name.substring(1));
+        } else if (name.matches("#x[0-9a-fA-F]+$")) {
+            number = Long.parseLong(name.substring(2), 16);
+        } else {
+            throw new XMLStreamException("WBXML definition only allows character entity references '#[0-9]+' or '#x[0-9a-fA-F]+'.");
+        }
+        if (current.getElement() != null) {
+            current.getElement().addContent(new WbXmlContent(
+                    new StringBuilder().append("&#").append(number).append(";").toString()));
+        }
     }
 
     /**

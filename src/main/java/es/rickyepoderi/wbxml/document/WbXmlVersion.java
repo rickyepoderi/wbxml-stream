@@ -61,7 +61,7 @@ public enum WbXmlVersion {
     /**
      * Version 1.1
      */
-    VERSION_1_1((byte)1, (byte)0),
+    VERSION_1_1((byte)1, (byte)1),
     
     /**
      * Version 1.2
@@ -108,7 +108,50 @@ public enum WbXmlVersion {
     public byte getMinor() {
         return minor;
     }
-
+    
+    /**
+     * Compares this version with the passed one and return true if the
+     * current version is less than the passed.
+     * @param other The version to compare with
+     * @return true if this &lt; other, false if not
+     */
+    public boolean lessThan(WbXmlVersion other) {
+        return this.compareTo(other) < 0;
+    }
+    
+    /**
+     * Compares this version with the passed one and return true if the
+     * current version is greater than the passed.
+     * @param other The version to compare with
+     * @return true if this &gt; other, false if not
+     */
+    public boolean greaterThan(WbXmlVersion other) {
+        return this.compareTo(other) > 0;
+    }
+    
+    /**
+     * Return the version string in the form "major.minor".
+     * @return The version string
+     */
+    public String getVersion() {
+        return new StringBuilder().append(major).append('.').append(minor).toString();
+    }
+    
+    /**
+     * Searched over the list of versions to get the one that corresponds
+     * to the version string.
+     * @param version The version string in the form "major.minor"
+     * @return The version or null
+     */
+    static public WbXmlVersion locateVersion(String version) {
+        for (WbXmlVersion v : WbXmlVersion.values()) {
+            if (v.getVersion().equals(version)) {
+                return v;
+            }
+        }
+        return null;
+    }
+    
     /**
      * Searches over the list of versions to get the one that corresponds to
      * this major and minor.

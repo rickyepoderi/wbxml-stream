@@ -57,7 +57,7 @@ public class WbXmlCharactersEvent extends WbXmlEvent implements Characters {
     private boolean whitespace = false;
     
     /**
-     * If the event was a CDATA or simple CAHRACTERS
+     * If the event was a CDATA or simple CHARACTERS
      */
     private boolean cdata = false;
     

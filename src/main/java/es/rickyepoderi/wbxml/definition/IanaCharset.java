@@ -156,7 +156,7 @@ public enum IanaCharset {
      * @return The associated charset or UNKNOWN.
      */
     static public IanaCharset getIanaCharset(String alias) {
-        IanaCharset charset = charsetAliasMap.get(alias);
+        IanaCharset charset = charsetAliasMap.get(alias.toUpperCase());
         if (charset == null) {
             charset = UNKNOWN;
         }
@@ -194,7 +194,7 @@ public enum IanaCharset {
      * Method that search the Java associated Charset to the IANA one. 
      * This method tries to locate the Java charset using the name and all the
      * alias of the charset, if found that Java Charset is returned, if not, it
-     * defaults to ASCII.
+     * defaults to UTF8.
      * @return The Java associated charset
      */
     public Charset getCharset() {
@@ -213,7 +213,7 @@ public enum IanaCharset {
                 if (mibEnum != 0) {
                     log.log(Level.WARNING, "Iana charset '{0}' has no Java equivalence", this.toString());
                 }
-                charset = getCharsetName("ASCII");
+                charset = getCharsetName("UTF-8");
             }
         }
         return charset;
@@ -224,7 +224,7 @@ public enum IanaCharset {
             charsetMibMap.put(c.getMibEnum(), c);
             charsetAliasMap.put(c.getName(), c);
             for (String alias: c.alias) {
-                charsetAliasMap.put(alias, c);
+                charsetAliasMap.put(alias.toUpperCase(), c);
             }
         }
     }

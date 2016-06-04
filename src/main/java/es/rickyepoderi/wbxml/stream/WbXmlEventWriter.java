@@ -37,6 +37,7 @@ package es.rickyepoderi.wbxml.stream;
 
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
 import es.rickyepoderi.wbxml.document.WbXmlEncoder;
+import es.rickyepoderi.wbxml.document.WbXmlVersion;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -83,10 +84,12 @@ public class WbXmlEventWriter implements XMLEventWriter {
      * @param encoderType The encoder type to use
      * @param skipSpaces if the spaces are trimmed
      * @param encoding The encoding to use if not specified
+     * @param version The WBXML version to use for encoding
      */
     public WbXmlEventWriter(OutputStream os, WbXmlDefinition def, 
-            WbXmlEncoder.StrtblType encoderType, boolean skipSpaces, String encoding) {
-        stream = new WbXmlStreamWriter(os, def, encoderType, skipSpaces, encoding);
+            WbXmlEncoder.StrtblType encoderType, boolean skipSpaces, 
+            String encoding, WbXmlVersion version) {
+        stream = new WbXmlStreamWriter(os, def, encoderType, skipSpaces, encoding, version);
     }
     
     /**
@@ -99,6 +102,19 @@ public class WbXmlEventWriter implements XMLEventWriter {
     public WbXmlEventWriter(OutputStream os, WbXmlDefinition def, 
             WbXmlEncoder.StrtblType encoderType, boolean skipSpaces) {
         stream = new WbXmlStreamWriter(os, def, encoderType, skipSpaces);
+    }
+    
+    /**
+     * Constructor with all the possible features except encoding.
+     * @param os The output stream to write
+     * @param def The definition to use (if null it is guessed)
+     * @param encoderType The encoder type to use
+     * @param skipSpaces if the spaces are trimmed
+     * @param version The WBXML version to use for encoding
+     */
+    public WbXmlEventWriter(OutputStream os, WbXmlDefinition def, 
+            WbXmlEncoder.StrtblType encoderType, boolean skipSpaces, WbXmlVersion version) {
+        stream = new WbXmlStreamWriter(os, def, encoderType, skipSpaces, version);
     }
     
     /**
@@ -320,7 +336,10 @@ public class WbXmlEventWriter implements XMLEventWriter {
                 break;
             case XMLStreamConstants.START_DOCUMENT:
                 StartDocument startDocument = (StartDocument) event;
-                stream.writeStartDocument(startDocument.getCharacterEncodingScheme(), 
+                // TODO: The event writer does not respect the encoding.
+                //       OutputKeys.ENCODING or factory encoding passed is not
+                //       used (in the stream writer encoding works ok)
+                stream.writeStartDocument(null, //startDocument.getCharacterEncodingScheme(), 
                         startDocument.getVersion());
                 break;
             case XMLStreamConstants.END_DOCUMENT:
@@ -344,7 +363,7 @@ public class WbXmlEventWriter implements XMLEventWriter {
                 break;
             default:
                 throw new UnsupportedOperationException(
-                        String.format("The %i event is not supported yet", event.getEventType()));
+                        String.format("The %d event is not supported yet", event.getEventType()));
         }
     }
 

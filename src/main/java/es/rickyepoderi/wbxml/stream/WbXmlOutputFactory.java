@@ -37,6 +37,7 @@ package es.rickyepoderi.wbxml.stream;
 
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
 import es.rickyepoderi.wbxml.document.WbXmlEncoder;
+import es.rickyepoderi.wbxml.document.WbXmlVersion;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -52,7 +53,7 @@ import javax.xml.transform.stream.StreamResult;
 
 /**
  * <p>The output factory to create stream and event writer for the WBXML
- * format. They supports three properties:</p>
+ * format. They supports the following properties:</p>
  * 
  * <ul>
  * <li>es.rickyepoderi.wbxml.stream.encodingType: The encoding type. The value
@@ -61,6 +62,8 @@ import javax.xml.transform.stream.StreamResult;
  * spaces. Boolean value (true by default).</li>
  * <li>es.rickyepoderi.wbxml.stream.definition: The definition to force. It
  * should be a WbXmlDefinition (by default is null, no forced definition).</li>
+ * <li>es.rickyepoderi.wbxml.stream.version: The WbXmlVersion to use
+ * for the encoding (by default is the last one 1.3).</li>
  * </ul>
  * 
  * @author ricky
@@ -85,6 +88,12 @@ public class WbXmlOutputFactory extends XMLOutputFactory {
     static public String DEFINITION_PROPERTY = "es.rickyepoderi.wbxml.stream.definition";
     
     /**
+     * The property for the WBXML version to use. WbXmlVersion value of the
+     * version, by default VERSION_1_3 is used.
+     */
+    static public String VERSION_PROPERTY = "es.rickyepoderi.wbxml.stream.version";
+    
+    /**
      * Properties of the factory.
      */
     private Map<String,Object> props = null;
@@ -96,6 +105,7 @@ public class WbXmlOutputFactory extends XMLOutputFactory {
         props = new HashMap<String,Object>();
         props.put(ENCODING_TYPE_PROPERTY, WbXmlEncoder.StrtblType.IF_NEEDED);
         props.put(SKIP_SPACES_PROPERTY, Boolean.TRUE);
+        props.put(VERSION_PROPERTY, WbXmlVersion.VERSION_1_3);
     }
     
     /**
@@ -121,7 +131,8 @@ public class WbXmlOutputFactory extends XMLOutputFactory {
         return new WbXmlStreamWriter(out, 
                 (WbXmlDefinition) props.get(DEFINITION_PROPERTY),
                 (WbXmlEncoder.StrtblType) props.get(ENCODING_TYPE_PROPERTY), 
-                (Boolean) props.get(SKIP_SPACES_PROPERTY));
+                (Boolean) props.get(SKIP_SPACES_PROPERTY),
+                (WbXmlVersion) props.get(VERSION_PROPERTY));
     }
 
     /**
@@ -137,7 +148,8 @@ public class WbXmlOutputFactory extends XMLOutputFactory {
                 (WbXmlDefinition) props.get(DEFINITION_PROPERTY),
                 (WbXmlEncoder.StrtblType) props.get(ENCODING_TYPE_PROPERTY), 
                 (Boolean) props.get(SKIP_SPACES_PROPERTY),
-                encoding);
+                encoding,
+                (WbXmlVersion) props.get(VERSION_PROPERTY));
     }
 
     /**
@@ -154,7 +166,8 @@ public class WbXmlOutputFactory extends XMLOutputFactory {
                 return new WbXmlStreamWriter(new FileOutputStream(result.getSystemId()),
                         (WbXmlDefinition) props.get(DEFINITION_PROPERTY),
                         (WbXmlEncoder.StrtblType) props.get(ENCODING_TYPE_PROPERTY),
-                        (Boolean) props.get(SKIP_SPACES_PROPERTY));
+                        (Boolean) props.get(SKIP_SPACES_PROPERTY),
+                        (WbXmlVersion) props.get(VERSION_PROPERTY));
             } else {
                 throw new XMLStreamException("WBXML only support StreamResult!");
             }
@@ -177,7 +190,8 @@ public class WbXmlOutputFactory extends XMLOutputFactory {
                 return new WbXmlEventWriter(new FileOutputStream(result.getSystemId()),
                         (WbXmlDefinition) props.get(DEFINITION_PROPERTY),
                         (WbXmlEncoder.StrtblType) props.get(ENCODING_TYPE_PROPERTY),
-                        (Boolean) props.get(SKIP_SPACES_PROPERTY));
+                        (Boolean) props.get(SKIP_SPACES_PROPERTY),
+                        (WbXmlVersion) props.get(VERSION_PROPERTY));
             } else {
                 throw new XMLStreamException("WBXML only support StreamResult!");
             }
@@ -197,7 +211,8 @@ public class WbXmlOutputFactory extends XMLOutputFactory {
         return new WbXmlEventWriter(out,
                 (WbXmlDefinition) props.get(DEFINITION_PROPERTY),
                 (WbXmlEncoder.StrtblType) props.get(ENCODING_TYPE_PROPERTY), 
-                (Boolean) props.get(SKIP_SPACES_PROPERTY));
+                (Boolean) props.get(SKIP_SPACES_PROPERTY),
+                (WbXmlVersion) props.get(VERSION_PROPERTY));
     }
 
     /**
@@ -213,7 +228,8 @@ public class WbXmlOutputFactory extends XMLOutputFactory {
                 (WbXmlDefinition) props.get(DEFINITION_PROPERTY),
                 (WbXmlEncoder.StrtblType) props.get(ENCODING_TYPE_PROPERTY), 
                 (Boolean) props.get(SKIP_SPACES_PROPERTY),
-                encoding);
+                encoding,
+                (WbXmlVersion) props.get(VERSION_PROPERTY));
     }
 
     /**
@@ -244,6 +260,8 @@ public class WbXmlOutputFactory extends XMLOutputFactory {
            props.put(prop, (Boolean) value);
        } else if (ENCODING_TYPE_PROPERTY.equals(prop)) {
            props.put(ENCODING_TYPE_PROPERTY, (WbXmlEncoder.StrtblType) value);
+       } else if (VERSION_PROPERTY.equals(prop)) {
+           props.put(VERSION_PROPERTY, (WbXmlVersion) value);
        } else {
            throw new IllegalArgumentException(String.format("Invalid property %s", prop));
        }
@@ -272,7 +290,8 @@ public class WbXmlOutputFactory extends XMLOutputFactory {
     public boolean isPropertySupported(String prop) {
         return DEFINITION_PROPERTY.equals(prop) ||
                 SKIP_SPACES_PROPERTY.equals(prop) ||
-                ENCODING_TYPE_PROPERTY.equals(prop);
+                ENCODING_TYPE_PROPERTY.equals(prop) ||
+                VERSION_PROPERTY.equals(prop);
     }
     
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<XYZ>
+    <CARD NAME="abc" STYLE="LIST">
+        <DO TYPE="ACCEPT" URL="http://xyz.org/s"/>
+        Enter name: <INPUT TYPE="TEXT" KEY="N"/>
+    </CARD>
+</XYZ>

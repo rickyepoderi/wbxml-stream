@@ -152,7 +152,7 @@ public class WbXmlDocument {
      * @param body The body of the document
      */
     public WbXmlDocument(WbXmlVersion version, WbXmlDefinition definition, IanaCharset charset, WbXmlBody body) {
-        this.version = WbXmlVersion.VERSION_1_3;
+        this.version = version;
         this.definition = definition;
         this.strtbl = new WbXmlStrtbl();
         this.charset = charset;

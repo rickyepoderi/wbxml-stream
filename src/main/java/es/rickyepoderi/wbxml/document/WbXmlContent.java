@@ -179,6 +179,10 @@ public class WbXmlContent {
         return isString() && string.startsWith("&#") && string.endsWith(";");
     }
     
+    /**
+     * Return the character number associated to the entity.
+     * @return The numeric character entity in UCS-4
+     */
     public long getEntityNumber() {
         if (isEntity()) {
             String number = string.substring(2, string.length() - 1);

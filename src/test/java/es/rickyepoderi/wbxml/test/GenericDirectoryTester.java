@@ -6,6 +6,7 @@ package es.rickyepoderi.wbxml.test;
 
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
 import es.rickyepoderi.wbxml.document.WbXmlEncoder;
+import es.rickyepoderi.wbxml.document.WbXmlVersion;
 import es.rickyepoderi.wbxml.stream.WbXmlInputFactory;
 import es.rickyepoderi.wbxml.stream.WbXmlOutputFactory;
 import java.io.ByteArrayInputStream;
@@ -57,6 +58,16 @@ public class GenericDirectoryTester {
         this.inFact = new WbXmlInputFactory();
         inFact.setProperty(WbXmlInputFactory.DEFINITION_PROPERTY, def);
         this.outFact = new WbXmlOutputFactory();
+        outFact.setProperty(WbXmlOutputFactory.DEFINITION_PROPERTY, def);
+    }
+    
+    public String getDirectory() {
+        return this.directory;
+    }
+    
+    public void setDefinition(WbXmlDefinition def) {
+        this.def = def;
+        inFact.setProperty(WbXmlInputFactory.DEFINITION_PROPERTY, def);
         outFact.setProperty(WbXmlOutputFactory.DEFINITION_PROPERTY, def);
     }
     
@@ -204,7 +215,7 @@ public class GenericDirectoryTester {
         }
     }
     
-    protected byte[] doc2WbXml(Document doc, WbXmlDefinition def,
+    protected byte[] doc2WbXml(Document doc, WbXmlDefinition def, WbXmlVersion version,
             WbXmlEncoder.StrtblType encoderType, boolean skipSpaces, boolean event) throws Exception {
         XMLStreamWriter xmlStreamWriter = null;
         XMLEventWriter xmlEventWriter = null;
@@ -213,6 +224,8 @@ public class GenericDirectoryTester {
             out = new ByteArrayOutputStream();
             outFact.setProperty(WbXmlOutputFactory.ENCODING_TYPE_PROPERTY, encoderType);
             outFact.setProperty(WbXmlOutputFactory.SKIP_SPACES_PROPERTY, skipSpaces);
+            outFact.setProperty(WbXmlOutputFactory.VERSION_PROPERTY, version);
+            outFact.setProperty(WbXmlOutputFactory.DEFINITION_PROPERTY, def);
             if (event) {
                 xmlEventWriter = outFact.createXMLEventWriter(out);
             } else {
@@ -256,7 +269,7 @@ public class GenericDirectoryTester {
         return o;
     }
     
-    protected byte[] object2WbXml(Object o, WbXmlDefinition def,
+    protected byte[] object2WbXml(Object o, WbXmlDefinition def, WbXmlVersion version,
             WbXmlEncoder.StrtblType encoderType, boolean skipSpaces, boolean event) throws Exception {
         XMLStreamWriter xmlStreamWriter = null;
         XMLEventWriter xmlEventWriter = null;
@@ -265,6 +278,8 @@ public class GenericDirectoryTester {
             out = new ByteArrayOutputStream();
             outFact.setProperty(WbXmlOutputFactory.ENCODING_TYPE_PROPERTY, encoderType);
             outFact.setProperty(WbXmlOutputFactory.SKIP_SPACES_PROPERTY, skipSpaces);
+            outFact.setProperty(WbXmlOutputFactory.VERSION_PROPERTY, version);
+            outFact.setProperty(WbXmlOutputFactory.DEFINITION_PROPERTY, def);
             if (event) {
                 xmlEventWriter = outFact.createXMLEventWriter(out);
             } else {
@@ -304,12 +319,12 @@ public class GenericDirectoryTester {
         return result;
     }
             
-    protected boolean testXmlFile(File f, WbXmlDefinition def,
+    protected boolean testXmlFile(File f, WbXmlDefinition def, WbXmlVersion version,
             WbXmlEncoder.StrtblType encoderType, boolean skipSpaces,
             boolean event) {
         try {
             Document doc1 = xmlFile2Doc(f);
-            byte[] bytes = doc2WbXml(doc1, def, encoderType, skipSpaces, event);
+            byte[] bytes = doc2WbXml(doc1, def, version, encoderType, skipSpaces, event);
             Document doc2 = wbxml2doc(bytes, def, event);
             boolean result = checkDocs(doc1, doc2);
             System.out.println(String.format("Testing file '%s' = %s", 
@@ -322,12 +337,12 @@ public class GenericDirectoryTester {
         }
     }
     
-    protected boolean testXmlJaxbFile(File f, WbXmlDefinition def,
+    protected boolean testXmlJaxbFile(File f, WbXmlDefinition def, WbXmlVersion version, 
             WbXmlEncoder.StrtblType encoderType, boolean skipSpaces,
             boolean event) {
         try {
             Object o1 = xmlFile2Object(f);
-            byte[] bytes = object2WbXml(o1, def, encoderType, skipSpaces, event);
+            byte[] bytes = object2WbXml(o1, def, version, encoderType, skipSpaces, event);
             Document doc1 = wbxml2doc(bytes, def, event);
             Object o2 = xmlFile2Object(f);
             Document doc2 = object2Doc(o2);
@@ -342,12 +357,12 @@ public class GenericDirectoryTester {
         }
     }
     
-    protected boolean testWbXmlJaxbFile(File f, WbXmlDefinition def,
+    protected boolean testWbXmlJaxbFile(File f, WbXmlDefinition def, WbXmlVersion version,
             WbXmlEncoder.StrtblType encoderType, boolean skipSpaces,
             boolean event) throws Exception {
         try {
             Object o1 = wbxmlFile2Object(f, event);
-            byte[] bytes = object2WbXml(o1, def, encoderType, skipSpaces, event);
+            byte[] bytes = object2WbXml(o1, def, version, encoderType, skipSpaces, event);
             Document doc1 = wbxml2doc(bytes, def, event);
             Object o2 = wbxmlFile2Object(f, event);
             Document doc2 = object2Doc(o2);
@@ -362,12 +377,12 @@ public class GenericDirectoryTester {
         }
     }
     
-    protected boolean testWbXmlFile(File f, WbXmlDefinition def,
+    protected boolean testWbXmlFile(File f, WbXmlDefinition def, WbXmlVersion version, 
             WbXmlEncoder.StrtblType encoderType, boolean skipSpaces,
             boolean event) throws Exception {
         try {
             Document doc1 = wbxmlFile2Doc(f, event);
-            byte[] bytes = doc2WbXml(doc1, def, encoderType, skipSpaces, event);
+            byte[] bytes = doc2WbXml(doc1, def, version, encoderType, skipSpaces, event);
             Document doc2 = wbxml2doc(bytes, def, event);
             boolean result = checkDocs(doc1, doc2);
             System.out.println(String.format("Testing file '%s' = %s", 
@@ -393,14 +408,19 @@ public class GenericDirectoryTester {
         });
     }
     
-    protected void testXmlDirectory(WbXmlEncoder.StrtblType encoderType, 
+    protected void testXmlDirectory(WbXmlEncoder.StrtblType encoderType,
             boolean skipSpaces, boolean event) throws Exception {
-        System.out.println(String.format("Testing XML DOM definition '%s' type=%s skip=%b event=%b...", 
-                def.getName(), encoderType.name(), skipSpaces, event));
+        testXmlDirectory(WbXmlVersion.VERSION_1_3, encoderType, skipSpaces, event);
+    }
+    
+    protected void testXmlDirectory(WbXmlVersion version, WbXmlEncoder.StrtblType encoderType,
+            boolean skipSpaces, boolean event) throws Exception {
+        System.out.println(String.format("Testing XML DOM - version '%s' definition '%s' type=%s skip=%b event=%b...", 
+                version.getVersion(), def.getName(), encoderType.name(), skipSpaces, event));
         File[] files = getFiles(".xml");
         int errors = 0;
         for (File f: files) {
-            boolean ok = testXmlFile(f, def, encoderType, skipSpaces, event);
+            boolean ok = testXmlFile(f, def, version, encoderType, skipSpaces, event);
             if (!ok) {
                 errors++;
             }
@@ -410,14 +430,19 @@ public class GenericDirectoryTester {
         Assert.assertEquals(errors, 0);
     }
     
-    protected void testXmlJaxbDirectory(WbXmlEncoder.StrtblType encoderType, 
+    protected void testXmlJaxbDirectory(WbXmlEncoder.StrtblType encoderType,
             boolean skipSpaces, boolean event) throws Exception {
-        System.out.println(String.format("Testing XML JAXB definition '%s' type=%s skip=%b event=%b...", 
-                def.getName(), encoderType.name(), skipSpaces, event));
+        testXmlJaxbDirectory(WbXmlVersion.VERSION_1_3, encoderType, skipSpaces, event);
+    }
+    
+    protected void testXmlJaxbDirectory(WbXmlVersion version, WbXmlEncoder.StrtblType encoderType,
+            boolean skipSpaces, boolean event) throws Exception {
+        System.out.println(String.format("Testing XML JAXB - version '%s' definition '%s' type=%s skip=%b event=%b...", 
+                version.getVersion(), def.getName(), encoderType.name(), skipSpaces, event));
         File[] files = getFiles(".xml");
         int errors = 0;
         for (File f: files) {
-            boolean ok = testXmlJaxbFile(f, def, encoderType, skipSpaces, event);
+            boolean ok = testXmlJaxbFile(f, def, version, encoderType, skipSpaces, event);
             if (!ok) {
                 errors++;
             }
@@ -427,14 +452,19 @@ public class GenericDirectoryTester {
         Assert.assertEquals(errors, 0);
     }
     
-    protected void testWbXmlDirectory(WbXmlEncoder.StrtblType encoderType, 
+    protected void testWbXmlDirectory(WbXmlEncoder.StrtblType encoderType,
             boolean skipSpaces, boolean event) throws Exception {
-        System.out.println(String.format("Testing WBXML DOM definition '%s' type=%s skip=%b event=%b...", 
-                def.getName(), encoderType.name(), skipSpaces, event));
+        testWbXmlDirectory(WbXmlVersion.VERSION_1_3, encoderType, skipSpaces, event);
+    }
+    
+    protected void testWbXmlDirectory(WbXmlVersion version, WbXmlEncoder.StrtblType encoderType,
+            boolean skipSpaces, boolean event) throws Exception {
+        System.out.println(String.format("Testing WBXML DOM - version '%s' definition '%s' type=%s skip=%b event=%b...", 
+                version.getVersion(), def.getName(), encoderType.name(), skipSpaces, event));
         File[] files = getFiles(".wbxml");
         int errors = 0;
         for (File f: files) {
-            boolean ok = testWbXmlFile(f, def, encoderType, skipSpaces, event);
+            boolean ok = testWbXmlFile(f, def, version, encoderType, skipSpaces, event);
             if (!ok) {
                 errors++;
             }
@@ -444,14 +474,19 @@ public class GenericDirectoryTester {
         Assert.assertEquals(errors, 0);
     }
     
-    protected void testWbXmlJaxbDirectory(WbXmlEncoder.StrtblType encoderType, 
+    protected void testWbXmlJaxbDirectory(WbXmlEncoder.StrtblType encoderType,
             boolean skipSpaces, boolean event) throws Exception {
-        System.out.println(String.format("Testing WBXML JAXB definition '%s' type=%s skip=%b event=%b...", 
-                def.getName(), encoderType.name(), skipSpaces, event));
+        testWbXmlJaxbDirectory(WbXmlVersion.VERSION_1_3, encoderType, skipSpaces, event);
+    }
+    
+    protected void testWbXmlJaxbDirectory(WbXmlVersion version, WbXmlEncoder.StrtblType encoderType,
+            boolean skipSpaces, boolean event) throws Exception {
+        System.out.println(String.format("Testing WBXML JAXB - version '%s' definition '%s' type=%s skip=%b event=%b...", 
+                version.getVersion(), def.getName(), encoderType.name(), skipSpaces, event));
         File[] files = getFiles(".wbxml");
         int errors = 0;
         for (File f: files) {
-            boolean ok = testWbXmlJaxbFile(f, def, encoderType, skipSpaces, event);
+            boolean ok = testWbXmlJaxbFile(f, def, version, encoderType, skipSpaces, event);
             if (!ok) {
                 errors++;
             }

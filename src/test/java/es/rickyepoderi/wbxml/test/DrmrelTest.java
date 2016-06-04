@@ -6,6 +6,7 @@ package es.rickyepoderi.wbxml.test;
 
 import es.rickyepoderi.wbxml.definition.WbXmlInitialization;
 import es.rickyepoderi.wbxml.document.WbXmlEncoder;
+import es.rickyepoderi.wbxml.document.WbXmlVersion;
 import org.testng.annotations.Test;
 
 /**
@@ -59,7 +60,15 @@ public class DrmrelTest extends GenericDirectoryTester {
         testWbXmlJaxbDirectory(WbXmlEncoder.StrtblType.NO, true, false);
     }
     
+    @Test(groups = {"xml", "drmrel", "type-no", "jaxb", "stream", "wbxml10" })
+    public void testXMLStreamJaxb10() throws Exception {
+        testXmlJaxbDirectory(WbXmlVersion.VERSION_1_0, WbXmlEncoder.StrtblType.NO, true, false);
+    }
     
+    @Test(groups = {"wbxml", "drmrel", "type-no", "jaxb", "stream", "wbxml10" })
+    public void testWBXMLStreamJaxb10() throws Exception {
+        testWbXmlJaxbDirectory(WbXmlVersion.VERSION_1_0, WbXmlEncoder.StrtblType.NO, true, false);
+    }
     
     @Test(groups = {"xml", "drmrel", "type-if-needed", "event" })
     public void testXmlEventIfNeeded() throws Exception {
@@ -99,6 +108,16 @@ public class DrmrelTest extends GenericDirectoryTester {
     @Test(groups = {"wbxml", "drmrel", "type-no", "jaxb", "event" })
     public void testWBXMLEventJaxb() throws Exception {
         testWbXmlJaxbDirectory(WbXmlEncoder.StrtblType.NO, true, true);
+    }
+    
+    @Test(groups = {"xml", "drmrel", "type-no", "jaxb", "event", "wbxml10" })
+    public void testXMLEventJaxb10() throws Exception {
+        testXmlJaxbDirectory(WbXmlVersion.VERSION_1_0, WbXmlEncoder.StrtblType.NO, true, true);
+    }
+    
+    @Test(groups = {"wbxml", "drmrel", "type-no", "jaxb", "event", "wbxml10" })
+    public void testWBXMLEventJaxb10() throws Exception {
+        testWbXmlJaxbDirectory(WbXmlVersion.VERSION_1_0, WbXmlEncoder.StrtblType.NO, true, true);
     }
 
 }

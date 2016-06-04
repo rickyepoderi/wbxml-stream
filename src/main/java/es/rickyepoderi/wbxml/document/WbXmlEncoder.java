@@ -88,7 +88,7 @@ public class WbXmlEncoder {
     /**
      * Logger for the class.
      */
-    protected static final Logger log = Logger.getLogger(WbXmlEncoder.class.getName());
+    private static final Logger log = Logger.getLogger(WbXmlEncoder.class.getName());
     
     /**
      * Initial length of the auxiliary ByteArrayOuputStream.
@@ -352,6 +352,11 @@ public class WbXmlEncoder {
      */
     public void writeSwitchPageAttribute(byte page) throws IOException {
         if (pageAttrState != page) {
+            if (doc.getVersion().lessThan(WbXmlVersion.VERSION_1_2)) {
+                // the switch page is added in version 1.2
+                throw new IOException(String.format("Version %s cannot manage switch page (attribute)",
+                        doc.getVersion().getVersion()));
+            }
             pageAttrState = page;
             write(WbXmlLiterals.SWTICH_PAGE);
             write(pageAttrState);
@@ -378,6 +383,11 @@ public class WbXmlEncoder {
      */
     public void writeSwitchPageTag(byte page) throws IOException {
         if (pageTagState != page) {
+            if (doc.getVersion().lessThan(WbXmlVersion.VERSION_1_2)) {
+                // the switch page is added in version 1.2
+                throw new IOException(String.format("Version %s cannot manage switch page (tag)",
+                        doc.getVersion().getVersion()));
+            }
             pageTagState = page;
             write(WbXmlLiterals.SWTICH_PAGE);
             write(pageTagState);
@@ -656,6 +666,55 @@ public class WbXmlEncoder {
     }
     
     /**
+     * Method to encode the character set of the document. The character set
+     * is the number defined for that IANA charset or 0 for unknown.
+     * 
+     * <pre>
+     * charset = mb_u_int32 // 0 unknown character set
+     * </pre>
+     * 
+     * @param charset The IANA charset user by the document
+     * @throws IOException Some error writing
+     */
+    public void encode(IanaCharset charset) throws IOException {
+        if (doc.getVersion().greaterThan(WbXmlVersion.VERSION_1_0)) {
+            // version 1.0 does not manage charsets
+            if (doc.getCharset() != null) {
+                writeUnsignedInteger(doc.getCharset().getMibEnum());
+            } else {
+                writeUnsignedInteger(0);
+            }
+        }
+    }
+    
+    /**
+     * Encode the definition of the document. The definition can be the 
+     * public ID standardized for a known specification but can also
+     * be the unknown definition. In case of unknown the strbl can be used
+     * to write the XML public id.
+     * 
+     * <pre>
+     * publicid = mb_u_int32 | ( zero index )
+     * </pre>
+     * 
+     * @param def The definition used by the doc
+     * @throws IOException Some error writing
+     */
+    public void encode(WbXmlDefinition def) throws IOException {
+        if (def.getPublicId() == WbXmlDefinition.PUBLIC_ID_UNKNOWN
+                && !StrtblType.NO.equals(type)
+                && def.getXmlPublicId() != null) {
+            // unknown wbxml public id => write the xml public id using strtbl
+            writeUnsignedInteger(WbXmlDefinition.PUBLIC_ID_STR_T);
+            long idx = doc.getStrtbl().addString(this, def.getXmlPublicId());
+            writeUnsignedInteger(idx);
+        } else {
+            // write normal number or unknown if NO strtbl is used
+            writeUnsignedInteger(def.getPublicId());
+        }
+    }
+    
+    /**
      * Method that encodes the whole document to the stream. The method writes
      * the different elements that compounds a WBXML document, following
      * the specifications are the following:
@@ -678,22 +737,8 @@ public class WbXmlEncoder {
     public void encode(WbXmlDocument doc) throws IOException {
         // write the fixed data
         encode(doc.getVersion());
-        if (doc.getDefinition().getPublicId() == WbXmlDefinition.PUBLIC_ID_UNKNOWN
-                && !StrtblType.NO.equals(type)
-                && doc.getDefinition().getXmlPublicId() != null) {
-            // unknown wbxml public id => write the xml public id using strtbl
-            writeUnsignedInteger(WbXmlDefinition.PUBLIC_ID_STR_T);
-            long idx = doc.getStrtbl().addString(this, doc.getDefinition().getXmlPublicId());
-            writeUnsignedInteger(idx);
-        } else {
-            // write normal number or unknown if NO strtbl is used
-            writeUnsignedInteger(doc.getDefinition().getPublicId());
-        }
-        if (doc.getCharset() != null) {
-            writeUnsignedInteger(doc.getCharset().getMibEnum());
-        } else {
-            writeUnsignedInteger(0);
-        }
+        encode(doc.getDefinition());
+        encode(doc.getCharset());
         encode(doc.getStrtbl());
         reset();
         encode(doc.getBody());
@@ -748,9 +793,14 @@ public class WbXmlEncoder {
             // *content
             for (WbXmlContent content : element.getContents()) {
                 OpaqueContentPlugin plugin = getDefinition().locateTagPlugin(element.getTag());
-                if (plugin != null) {
+                if (plugin != null && doc.getVersion().greaterThan(WbXmlVersion.VERSION_1_0)) {
+                    // opaque for content is defined in 1.1
                     plugin.encode(this, element, content);
                 } else {
+                    if (plugin != null) {
+                        log.log(Level.WARNING, "Opaque not used for element \"{0}\" because version \"{1}\" does not accept tag opaques.", 
+                                new Object[]{element.getTag(), doc.getVersion().getVersion()});
+                    }
                     encode(content);
                 }
             }
@@ -897,9 +947,14 @@ public class WbXmlEncoder {
             if (def != null ) {
                 plugin = getDefinition().locateAttrPlugin(def.getNameWithPrefix());
             }
-            if (plugin != null) {
+            if (plugin != null && doc.getVersion().greaterThan(WbXmlVersion.VERSION_1_1)) {
+                // opaque for attrs is defined in version 1.2
                 plugin.encode(this, element, attr, v);
             } else {
+                if (plugin != null) {
+                    log.log(Level.WARNING, "Opaque not used for attribute \"{0}\" in element \"{1}\" because version \"{2}\" does not accept attribute opaques.",
+                            new Object[]{attr.getName(), element.getTag(), doc.getVersion().getVersion()});
+                }
                 encodeAttributeValue(v);
             }
             first = false;
