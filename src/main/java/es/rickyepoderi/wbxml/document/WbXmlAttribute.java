@@ -301,15 +301,30 @@ public class WbXmlAttribute {
     /**
      * This method convert the list of values again into a only one value. 
      * After that the attribute is not compacted.
-     * TODO: what about entities, now are just appended "abcd...&20;...cc"
      */
     public void normalize() {
         StringBuilder sb = new StringBuilder();
+        List<String> newValues = new ArrayList<String>();
         for (String v: values) {
-            sb.append(v);
+            if (WbXmlLiterals.isEntity(v)) {
+                // the entity is not joined to preserve the entity
+                // first add the previous part if exists
+                if (sb.length() > 0)  {
+                    newValues.add(sb.toString());
+                    sb.setLength(0);
+                }
+                // now add the entity
+                newValues.add(v);
+            } else {
+                // just append the attribute value
+                sb.append(v);
+            }
         }
-        values.clear();
-        values.add(sb.toString());
+        // add the last value if needed or empty value
+        if (sb.length() > 0 || newValues.isEmpty()) {
+            newValues.add(sb.toString());
+        }
+        values = newValues;
         compacted = false;
     }
     

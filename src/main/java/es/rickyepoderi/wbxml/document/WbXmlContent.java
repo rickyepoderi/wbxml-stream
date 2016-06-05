@@ -176,7 +176,7 @@ public class WbXmlContent {
      * @return true if it is a entity content, false otherwise
      */
     public boolean isEntity() {
-        return isString() && string.startsWith("&#") && string.endsWith(";");
+        return isString() && WbXmlLiterals.isEntity(string);
     }
     
     /**
@@ -184,12 +184,7 @@ public class WbXmlContent {
      * @return The numeric character entity in UCS-4
      */
     public long getEntityNumber() {
-        if (isEntity()) {
-            String number = string.substring(2, string.length() - 1);
-            return Long.parseLong(number);
-        } else {
-            throw new IllegalStateException(String.format("The value is not an entity: %s", string));
-        }
+        return WbXmlLiterals.getEntityNumber(string);
     }
     
     /**

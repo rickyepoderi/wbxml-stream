@@ -864,18 +864,23 @@ public class WbXmlEncoder {
      * @throws IOException Some error writing to the stream
      */
     public void encodeAttributeValue(String value) throws IOException {
-        WbXmlAttributeValueDef valueAttrDef = getDefinition().locateAttributeValue(value);
-        if (valueAttrDef != null) {
-            // it is an attribute value
-            writeSwitchPageAttribute(valueAttrDef.getToken().getPageCode());
-            write(valueAttrDef.getToken().getToken());
+        if (WbXmlLiterals.isEntity(value)) {
+            write(WbXmlLiterals.ENTITY);
+            writeUnsignedInteger(WbXmlLiterals.getEntityNumber(value));
         } else {
-            WbXmlExtensionDef extDef = getDefinition().locateExtension(value);
-            if (extDef != null) {
-                write(WbXmlLiterals.EXT_T_0);
-                writeUnsignedInteger(extDef.getToken());
+            WbXmlAttributeValueDef valueAttrDef = getDefinition().locateAttributeValue(value);
+            if (valueAttrDef != null) {
+                // it is an attribute value
+                writeSwitchPageAttribute(valueAttrDef.getToken().getPageCode());
+                write(valueAttrDef.getToken().getToken());
             } else {
-                writeString(value);
+                WbXmlExtensionDef extDef = getDefinition().locateExtension(value);
+                if (extDef != null) {
+                    write(WbXmlLiterals.EXT_T_0);
+                    writeUnsignedInteger(extDef.getToken());
+                } else {
+                    writeString(value);
+                }
             }
         }
     }

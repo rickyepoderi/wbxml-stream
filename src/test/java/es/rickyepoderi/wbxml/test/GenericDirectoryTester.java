@@ -65,6 +65,10 @@ public class GenericDirectoryTester {
         return this.directory;
     }
     
+    public WbXmlDefinition getDefinition() {
+        return this.def;
+    }
+    
     public void setDefinition(WbXmlDefinition def) {
         this.def = def;
         inFact.setProperty(WbXmlInputFactory.DEFINITION_PROPERTY, def);

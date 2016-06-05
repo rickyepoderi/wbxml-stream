@@ -200,4 +200,30 @@ public final class WbXmlLiterals {
         }
         return sb.toString();
     }
+    
+    /**
+     * Utility method to check if a string is an entity value.
+     * @param value The string to check
+     * @return true if it is an entity, false otherwise
+     */
+    static public boolean isEntity(String value) {
+        return value != null && value.matches("^&#[0-9]+;$|&#x[0-9a-fA-F]+;$");
+    }
+    
+    /**
+     * Utility method to get the numeric value of an entity string.
+     * @param entity The entity string
+     * @return the numeric value
+     */
+    static public long getEntityNumber(String entity) {
+        if (isEntity(entity)) {
+            if (entity.startsWith("&#x")) {
+                return Long.parseLong(entity.substring(3, entity.length() - 1), 16);
+            } else {
+                return Long.parseLong(entity.substring(2, entity.length() - 1));
+            }
+        } else {
+            throw new IllegalStateException(String.format("The value is not an entity: %s", entity));
+        }
+    }
 }

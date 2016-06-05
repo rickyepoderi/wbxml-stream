@@ -54,7 +54,7 @@ public class WVTest extends GenericDirectoryTester {
         testXmlJaxbDirectory(WbXmlEncoder.StrtblType.NO, true, false);
     }
     
-    @Test(groups = {"wbxml", "si", "type-no", "jaxb", "stream" })
+    @Test(groups = {"wbxml", "wv", "type-no", "jaxb", "stream" })
     public void testWBXMLStreamJaxb() throws Exception {
         testWbXmlJaxbDirectory(WbXmlEncoder.StrtblType.NO, true, false);
     }
@@ -96,7 +96,7 @@ public class WVTest extends GenericDirectoryTester {
         testXmlJaxbDirectory(WbXmlEncoder.StrtblType.NO, true, true);
     }
     
-    @Test(groups = {"wbxml", "si", "type-no", "jaxb", "event" })
+    @Test(groups = {"wbxml", "wv", "type-no", "jaxb", "event" })
     public void testWBXMLEventJaxb() throws Exception {
         testWbXmlJaxbDirectory(WbXmlEncoder.StrtblType.NO, true, true);
     }
