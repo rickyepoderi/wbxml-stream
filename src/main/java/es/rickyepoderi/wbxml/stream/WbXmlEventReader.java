@@ -37,6 +37,7 @@ package es.rickyepoderi.wbxml.stream;
 
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
 import es.rickyepoderi.wbxml.document.WbXmlParser;
+import es.rickyepoderi.wbxml.stream.events.WbXmlAttributeEvent;
 import es.rickyepoderi.wbxml.stream.events.WbXmlCharactersEvent;
 import es.rickyepoderi.wbxml.stream.events.WbXmlEndDocumentEvent;
 import es.rickyepoderi.wbxml.stream.events.WbXmlEndElementEvent;
@@ -182,17 +183,16 @@ public class WbXmlEventReader implements XMLEventReader {
             case XMLStreamConstants.END_ELEMENT:
                 event = new WbXmlEndElementEvent(stream);
                 break;
-            //case XMLStreamConstants.ATTRIBUTE:
-            //  The attriute is not going to be returned
-            //    currentEvent = new WbXmlAttributeEvent(stream, 0);
-            //    break;
+            case XMLStreamConstants.ATTRIBUTE:
+                event = new WbXmlAttributeEvent(stream, stream.getCurrentAttributeIndex());
+                break;
             case XMLStreamConstants.CHARACTERS:
             case XMLStreamConstants.CDATA:
                 event = new WbXmlCharactersEvent(stream);
                 break;
             default:
                 throw new UnsupportedOperationException(
-                        String.format("The %i event is not supported yet", eventType));
+                        String.format("The %d event is not supported yet", eventType));
         }
         log.log(Level.FINE, "constructEvent(): {0}", event);
         return event;
@@ -271,6 +271,7 @@ public class WbXmlEventReader implements XMLEventReader {
                 throw new XMLStreamException("Another START_ELEMENT found while iterating!");
             }
             // all the rest are ignored
+            event = this.nextEvent();
         }
         log.log(Level.FINE, "getElementText(): {0}", sb.toString());
         return sb.toString();
@@ -296,6 +297,7 @@ public class WbXmlEventReader implements XMLEventReader {
                     throw new XMLStreamException("Non-ignorable CHARACTERS found!");
                 }
             }
+            event = this.nextEvent();
         }
         log.log(Level.FINE, "nextTag(): {0}", event);
         return event;

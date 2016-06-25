@@ -35,7 +35,6 @@
  */
 package es.rickyepoderi.wbxml.stream.events;
 
-import es.rickyepoderi.wbxml.document.WbXmlAttribute;
 import es.rickyepoderi.wbxml.document.WbXmlElement;
 import es.rickyepoderi.wbxml.stream.WbXmlStreamReader;
 import java.util.ArrayList;
@@ -81,8 +80,8 @@ public class WbXmlStartElementEvent extends WbXmlEvent implements StartElement {
         element = stream.getCurrentElement();
         nsctx = stream.getNamespaceContext();
         attrs = new ArrayList<WbXmlAttributeEvent>(element.getAttributes().size());
-        for (WbXmlAttribute attr: element.getAttributes()) {
-            WbXmlAttributeEvent event = new WbXmlAttributeEvent(attr, stream);
+        for (int i = 0; i < element.getAttributes().size(); i++) {
+            WbXmlAttributeEvent event = new WbXmlAttributeEvent(stream, i);
             attrs.add(event);
         }
     }

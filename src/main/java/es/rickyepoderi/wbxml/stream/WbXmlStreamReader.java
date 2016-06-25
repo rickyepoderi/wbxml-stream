@@ -127,8 +127,21 @@ public class WbXmlStreamReader implements XMLStreamReader {
      * the current element and the current index in the contents of that element.
      */
     private class ElementIndex {
+        
+        /**
+         * Current element of the WBXML representation.
+         */
         WbXmlElement currentElement;
+        
+        /**
+         * The index of the content of the current element.
+         */
         Integer index;
+        
+        /**
+         * The index of the attribute of the current element.
+         */
+        Integer attrIdx;
     }
     
     /**
@@ -205,6 +218,14 @@ public class WbXmlStreamReader implements XMLStreamReader {
      */
     public WbXmlElement getCurrentElement() {
         return this.elementIndex.currentElement;
+    }
+    
+    /**
+     * Getter for the current attribute index
+     * @return The current attribute index
+     */
+    public Integer getCurrentAttributeIndex() {
+        return this.elementIndex.attrIdx;
     }
     
     /**
@@ -301,13 +322,12 @@ public class WbXmlStreamReader implements XMLStreamReader {
      * to the queue and start element is returned. If it is the other possibilities
      * just the correspondent event is treated.
      * 
-     * @param attributes boolean that marks if we want to read attributes or not
      * @return The next element following the commented process
      */
-    private int nextInElement(boolean attributes) {
-        if (attributes && !elementIndex.currentElement.isAttributesEmpty()) {
-            // attributes
-            elementIndex.index = null;
+    private int nextInElement() {
+        if (elementIndex.attrIdx != null && 
+                elementIndex.currentElement.attributesSize() > elementIndex.attrIdx) {
+            // there are still attributes in the element
             event = ATTRIBUTE;
         } else if (elementIndex.index != null &&
                 elementIndex.currentElement.contentsSize() > elementIndex.index) {
@@ -324,6 +344,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
                 elementIndex = new ElementIndex();
                 elementIndex.currentElement = content.getElement();
                 elementIndex.index = null;
+                elementIndex.attrIdx = null;
                 event = START_ELEMENT;
             }
         } else {
@@ -389,24 +410,26 @@ public class WbXmlStreamReader implements XMLStreamReader {
         } else if (event == START_ELEMENT) {
             // the next can be END_ELEMENT, ATTRIBUTE, CAHARACTERS, PROCESSING_INSTRUCTION
             elementIndex.index = 0;
+            elementIndex.attrIdx = 0;
             // Never return ATTRIBUTE
-            event = nextInElement(false);
+            event = nextInElement();
         } else if (event == ATTRIBUTE) {
             // the nest event can be CHARACTERS PROCESSING_INSTRUCTION
             elementIndex.index = 0;
-            event = nextInElement(false);
+            elementIndex.attrIdx++;
+            event = nextInElement();
         } else if (event == CHARACTERS) {
             elementIndex.index++;
-            event = nextInElement(false);
+            event = nextInElement();
         } else if (event == SPACE) {
             elementIndex.index++;
-            event = nextInElement(false);
+            event = nextInElement();
         } else if (event == ENTITY_REFERENCE) {
             elementIndex.index++;
-            event = nextInElement(false);
+            event = nextInElement();
         } else if (event == PROCESSING_INSTRUCTION) {
             elementIndex.index++;
-            event = nextInElement(false);
+            event = nextInElement();
         } else if (event == END_ELEMENT) {
             // get the saved element in the queue
             if (parents.isEmpty()) {
@@ -414,7 +437,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
             } else {
                 elementIndex = parents.pop();
                 elementIndex.index++;
-                event = nextInElement(false);
+                event = nextInElement();
             }
         } else if (event == END_DOCUMENT) {
             throw new XMLStreamException("End of coument reached!");
@@ -462,7 +485,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
     }
 
     /**
-     <p>* Reads the content of a text-only element, an exception is thrown if 
+     * <p> Reads the content of a text-only element, an exception is thrown if 
      * this is not a text-only element. Regardless of value of 
      * javax.xml.stream.isCoalescing this method always returns coalesced 
      * content.</p>
@@ -490,7 +513,8 @@ public class WbXmlStreamReader implements XMLStreamReader {
                     || eventType == ENTITY_REFERENCE) {
                 buf.append(getText());
             } else if (eventType == PROCESSING_INSTRUCTION
-                    || eventType == COMMENT) {
+                    || eventType == COMMENT 
+                    || eventType == ATTRIBUTE) {
                 // skipping
             } else if (eventType == END_DOCUMENT) {
                 throw new XMLStreamException(

@@ -46,21 +46,27 @@ import javax.xml.stream.events.Attribute;
  * 
  * @author ricky
  */
-class WbXmlAttributeEvent extends WbXmlEvent implements Attribute {
+public class WbXmlAttributeEvent extends WbXmlEvent implements Attribute {
 
-    WbXmlAttribute attr = null;
+    /**
+     * Name of the attribute.
+     */
+    private QName name;
+    
+    /**
+     * Value of the attribute.
+     */
+    private String value;
     
     /**
      * Constructor for the StartElement event.
-     * @param attr The attribute of the StartElement.
      * @param stream The stream for the location.
+     * @param attrIdx The index of the attribute
      */
-    public WbXmlAttributeEvent(WbXmlAttribute attr, WbXmlStreamReader stream) {
+    public WbXmlAttributeEvent(WbXmlStreamReader stream, int attrIdx) {
         super(stream, XMLStreamConstants.ATTRIBUTE);
-        if (stream.getEventType() != XMLStreamConstants.START_ELEMENT) {
-            throw new IllegalStateException("Not at START_ELEMENT position!");
-        }
-        this.attr = attr;
+        value = stream.getAttributeValue(attrIdx);
+        name = stream.getAttributeName(attrIdx);
     }
     
     /**
@@ -69,13 +75,6 @@ class WbXmlAttributeEvent extends WbXmlEvent implements Attribute {
      */
     @Override
     public QName getName() {
-        QName name;
-        if (attr.isPrefixed()) {
-            String namespaceUri = this.getDefinition().getNamespaceURIWithLinked(attr.getNamePrefix());
-            name = new QName(namespaceUri, attr.getNameWithoutPrefix(), attr.getNamePrefix());
-        } else {
-            name = new QName(attr.getName());
-        }
         return name;
     }
 
@@ -85,7 +84,7 @@ class WbXmlAttributeEvent extends WbXmlEvent implements Attribute {
      */
     @Override
     public String getValue() {
-        return attr.getValue();
+        return value;
     }
 
     /**
