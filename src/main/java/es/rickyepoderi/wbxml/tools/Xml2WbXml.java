@@ -76,7 +76,7 @@ import org.w3c.dom.Element;
  * <h3>SYNOPSYS</h3>
  * 
  * <p>java -cp wbxml-jaxb-X.X.X.jar es.rickyepoderi.wbxml.tools.WbXml2Xml
- * [-j --jaxb] [-t --type &lt;TYPE&gt;] [-k --keep] [-d --definition &lt;NAME&gt;] {infile} {outfile}</p>
+ * [-j --jaxb] [-t --type &lt;TYPE&gt;] [-k --keep] [-c --charset &lt;CHARSET&gt;] [-v --version &lt;X.X&gt;] [-d --definition &lt;NAME&gt;] {infile} {outfile}</p>
  * 
  * <h3>DESCRIPTION</h3>
  * 

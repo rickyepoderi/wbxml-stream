@@ -209,7 +209,7 @@ public enum IanaCharset {
                 }
             }
             if (charset == null) {
-                // defaults to ASCII
+                // defaults to UTF-8
                 if (mibEnum != 0) {
                     log.log(Level.WARNING, "Iana charset '{0}' has no Java equivalence", this.toString());
                 }
@@ -222,7 +222,7 @@ public enum IanaCharset {
     static {
         for (IanaCharset c: IanaCharset.values()) {
             charsetMibMap.put(c.getMibEnum(), c);
-            charsetAliasMap.put(c.getName(), c);
+            charsetAliasMap.put(c.getName().toUpperCase(), c);
             for (String alias: c.alias) {
                 charsetAliasMap.put(alias.toUpperCase(), c);
             }
