@@ -203,7 +203,7 @@ public class WbXmlInputFactory extends XMLInputFactory {
      */
     @Override
     public XMLEventReader createXMLEventReader(String systemId, Reader reader) throws XMLStreamException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new XMLStreamException("The WBXML is a binary format!");
     }
 
     /**

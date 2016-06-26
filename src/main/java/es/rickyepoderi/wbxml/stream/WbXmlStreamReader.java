@@ -64,7 +64,7 @@ import javax.xml.stream.XMLStreamReader;
  * 
  * <p>The implementation in WBXML always creates initially a WbXmlDocument
  * java object in memory (it can be said that first the java/memory representation
- * is created in the constructor part  and then the java object reprsentation
+ * is created in the constructor part and then the java object representation
  * is iterated. The parser is used to implement the XMLStreamReader.</p>
  * 
  * <p>The iteration over the parser is maintained with a event (the current
@@ -76,11 +76,8 @@ import javax.xml.stream.XMLStreamReader;
  * 
  * <p>Implementing the WbXmlEventReader it was discovered that ATTRIBUTE 
  * event type should be returned as many times as attributes are in the
- * element. Currently it is only returned once (it was thought that). Besides
- * it was discovered that underlaying implentations never use this event. They
- * when START_ELEMENT is received get all the attributes using getAttributeXXX
- * methods. For that ATTRIBUTE event type is never returned. Please use
- * START_ELEMENT instead.</p>
+ * element. A new attrIdx was added to the ElementIndex just to iterate
+ * over the attributes too.</p>
  * 
  * @author ricky
  */
@@ -401,8 +398,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
         log.fine("next()");
         // possible states: START_DOCUMENT PROCESSING_INSTRUCTION 
         //                  START_ELEMENT ATTRIBUTE CHARACTERS END_ELEMENT
-        //                  SPACE  END_DOCUMENT 
-        //                  ENTITY_REFERENCE
+        //                  SPACE END_DOCUMENT ENTITY_REFERENCE
         if (event == START_DOCUMENT) {
             // point to the first element in the doc or pi
             event = START_ELEMENT;
@@ -411,7 +407,6 @@ public class WbXmlStreamReader implements XMLStreamReader {
             // the next can be END_ELEMENT, ATTRIBUTE, CAHARACTERS, PROCESSING_INSTRUCTION
             elementIndex.index = 0;
             elementIndex.attrIdx = 0;
-            // Never return ATTRIBUTE
             event = nextInElement();
         } else if (event == ATTRIBUTE) {
             // the nest event can be CHARACTERS PROCESSING_INSTRUCTION
@@ -963,7 +958,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
 
     /**
      * Return true if the current event has text, false otherwise The following 
-     * events have text: CHARACTERS,DTD ,ENTITY_REFERENCE, COMMENT, SPACE
+     * events have text: CHARACTERS, DTD, ENTITY_REFERENCE, COMMENT, SPACE
      * @return true if current event is CHARACTERS or ENTITY_REFERENCE (only available text events in WBXML reader)
      */
     @Override

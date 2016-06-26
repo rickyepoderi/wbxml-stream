@@ -14,8 +14,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Iterator;
+import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -54,10 +57,9 @@ public class SiStAXTest {
         wbxmlFile = new File("src/test/examples/si/si-001.wbxml");
     }
     
-    @Test(groups = {"stax"} )
-    public void testReadWBXMLLoop() throws Exception {
+    private void readStreamLoop(InputStream in) throws Exception {
         XMLInputFactory f = new WbXmlInputFactory();
-        XMLStreamReader reader = f.createXMLStreamReader(new FileInputStream(wbxmlFile));
+        XMLStreamReader reader = f.createXMLStreamReader(in);
         boolean foundSi = false;
         boolean foundIndication = false;
         while (reader.hasNext()) {
@@ -80,7 +82,31 @@ public class SiStAXTest {
         reader.close();
     }
     
-    private void testNextElement(InputStream in) throws Exception {
+    private void readEventLoop(InputStream in) throws Exception {
+        XMLInputFactory f = new WbXmlInputFactory();
+        XMLEventReader reader = f.createXMLEventReader(in);
+        boolean foundSi = false;
+        boolean foundIndication = false;
+        while (reader.hasNext()) {
+            XMLEvent event = reader.nextEvent();
+            if (event.getEventType() == XMLStreamConstants.START_ELEMENT) {
+                if ("si".equals(event.asStartElement().getName().getLocalPart())) {
+                    foundSi = true;
+                } else if ("indication".equals(event.asStartElement().getName().getLocalPart())) {
+                    foundIndication = true;
+                    Assert.assertEquals("1999-06-25T15:23:15Z", event.asStartElement().getAttributeByName(new QName("created")).getValue());
+                    Assert.assertEquals("http://www.xyz.com/email/123/abc.wml", event.asStartElement().getAttributeByName(new QName("href")).getValue());
+                    Assert.assertEquals("1999-06-30T00:00:00Z", event.asStartElement().getAttributeByName(new QName("si-expires")).getValue());
+                    Assert.assertEquals("You have 4 new emails", reader.getElementText());
+                }
+            }
+        }
+        Assert.assertTrue(foundSi);
+        Assert.assertTrue(foundIndication);
+        reader.close();
+    }
+    
+    private void readStreamNextElement(InputStream in) throws Exception {
         XMLInputFactory f = new WbXmlInputFactory();
         XMLStreamReader reader = f.createXMLStreamReader(in);
         // read next tag
@@ -107,7 +133,7 @@ public class SiStAXTest {
         reader.close();
     }
     
-    private void testEventNextElement(InputStream in) throws Exception {
+    private void readEventNextElement(InputStream in) throws Exception {
         XMLInputFactory f = new WbXmlInputFactory();
         XMLEventReader reader = f.createXMLEventReader(in);
         // read next tag
@@ -146,7 +172,7 @@ public class SiStAXTest {
         reader.close();
     }
     
-    private void testNext(InputStream in) throws Exception {
+    private void readStreamNext(InputStream in) throws Exception {
         XMLInputFactory f = new WbXmlInputFactory();
         XMLStreamReader reader = f.createXMLStreamReader(in);
         // it should be start document
@@ -178,7 +204,7 @@ public class SiStAXTest {
         reader.close();
     }
     
-    private void testEventNext(InputStream in) throws Exception {
+    private void readEventNext(InputStream in) throws Exception {
         XMLInputFactory f = new WbXmlInputFactory();
         XMLEventReader reader = f.createXMLEventReader(in);
         // it should be start document
@@ -225,28 +251,7 @@ public class SiStAXTest {
         reader.close();
     }
     
-    @Test(groups = {"stax"} )
-    public void testReadWBXMLNextTag() throws Exception  {
-        testNextElement(new FileInputStream(wbxmlFile));
-    }
-    
-    @Test(groups = {"stax"} )
-    public void testReadWBXMLNext() throws Exception  {
-        testNext(new FileInputStream(wbxmlFile));
-    }
-    
-    @Test(groups = {"stax"} )
-    public void testEventReadWBXMLNextTag() throws Exception  {
-        testEventNextElement(new FileInputStream(wbxmlFile));
-    }
-    
-    @Test(groups = {"stax"} )
-    public void testEventReadWBXMLNext() throws Exception  {
-        testEventNext(new FileInputStream(wbxmlFile));
-    }
-    
-    @Test(groups = {"stax"})
-    public void testWriteWBML() throws Exception {
+    private byte[] writeStream() throws Exception {
         Indication indication = new Indication();
         indication.setCreated("1999-06-25T15:23:15Z");
         indication.setHref("http://www.xyz.com/email/123/abc.wml");
@@ -269,11 +274,50 @@ public class SiStAXTest {
         xmlStreamWriter.writeEndElement();
         xmlStreamWriter.writeEndDocument();
         xmlStreamWriter.close();
-        // check the write
-        testNextElement(new ByteArrayInputStream(bos.toByteArray()));
-        testNext(new ByteArrayInputStream(bos.toByteArray()));
-        testEventNextElement(new ByteArrayInputStream(bos.toByteArray()));
-        testEventNext(new ByteArrayInputStream(bos.toByteArray()));
+        return bos.toByteArray();
+    }
+    
+    private byte[] writeEvent() throws Exception {
+        Indication indication = new Indication();
+        indication.setCreated("1999-06-25T15:23:15Z");
+        indication.setHref("http://www.xyz.com/email/123/abc.wml");
+        indication.setSiExpires("1999-06-30T00:00:00Z");
+        indication.setvalue("You have 4 new emails");
+        Si si = new Si();
+        si.setIndication(indication);
+        // write the "si" object
+        XMLOutputFactory fact = new WbXmlOutputFactory();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        XMLEventFactory  eventFactory = XMLEventFactory.newInstance();
+        XMLEventWriter xmlEventWriter = fact.createXMLEventWriter(bos);
+        xmlEventWriter.add(eventFactory.createStartDocument("UTF-8", "1.0"));
+        xmlEventWriter.add(eventFactory.createStartElement(XMLConstants.DEFAULT_NS_PREFIX, null, "si"));
+        xmlEventWriter.add(eventFactory.createStartElement(XMLConstants.DEFAULT_NS_PREFIX, null, "indication"));
+        xmlEventWriter.add(eventFactory.createAttribute("href", si.getIndication().getHref()));
+        xmlEventWriter.add(eventFactory.createAttribute("created", si.getIndication().getCreated()));
+        xmlEventWriter.add(eventFactory.createAttribute("si-expires", si.getIndication().getSiExpires()));
+        xmlEventWriter.add(eventFactory.createCharacters(si.getIndication().getvalue()));
+        xmlEventWriter.add(eventFactory.createEndElement(XMLConstants.DEFAULT_NS_PREFIX, null, "indication"));
+        xmlEventWriter.add(eventFactory.createEndElement(XMLConstants.DEFAULT_NS_PREFIX, null, "si"));
+        xmlEventWriter.add(eventFactory.createEndDocument());
+        xmlEventWriter.close();
+        return bos.toByteArray();
+    }
+    
+    @Test(groups = {"stax", "stream"} )
+    public void testStream() throws Exception {
+        byte[] si = this.writeStream();
+        this.readStreamLoop(new ByteArrayInputStream(si));
+        this.readStreamNext(new ByteArrayInputStream(si));
+        this.readStreamNextElement(new ByteArrayInputStream(si));
+    }
+    
+    @Test(groups = {"stax", "event"} )
+    public void testEvent() throws Exception  {
+        byte[] si = this.writeEvent();
+        this.readEventLoop(new ByteArrayInputStream(si));
+        this.readEventNext(new ByteArrayInputStream(si));
+        this.readEventNextElement(new ByteArrayInputStream(si));
     }
     
 }

@@ -61,19 +61,6 @@ import javax.xml.stream.events.XMLEvent;
  * the WbXmlStreamReader internally, all the events are constructed using
  * the stream implementation and methods.</p>
  * 
- * <p>One thing is not completely understood. The ATTRIBUTE event in the 
- * WbXmlStreamReader is just reported one (the reader is at ATTRIBUTE). But here
- * it seems that the event should be reported for any attributes, one by one.
- * That means that Stream implementation is wrong. Checking this I saw that
- * the ATTRIBUTE event is never used in any Java parsing. It seems that
- * the parsing process reads the START_ELEMENT and from it it gets all the
- * attributes (both using Stream or Event).</p>
- * 
- * <p>The summary is that ATTRIBUTE event is never returned by both 
- * implementations. The attributes should be read from the START_ELEMENT.
- * If someone is sure how the ATTRIBUTE event should work in both readers
- * please comment something.</p>
- * 
  * <p>It was deeply considered to just implement this reader as a class
  * that extends XMLStreamReaderImpl. This class is the internal class in javaSE
  * that implements XMLEventReader. There is a constructor which uses a 
@@ -207,11 +194,15 @@ public class WbXmlEventReader implements XMLEventReader {
     @Override
     public XMLEvent nextEvent() throws XMLStreamException {
         log.log(Level.FINE, "nextEvent()");
-        currentEvent = nextEvent;
-        if (currentEvent.getEventType() != XMLStreamConstants.END_DOCUMENT) {
-            nextEvent = constructEvent(stream.next(), stream);
+        if (nextEvent == null) {
+            throw new NoSuchElementException();
         } else {
-            nextEvent = null;
+            currentEvent = nextEvent;
+            if (currentEvent.getEventType() != XMLStreamConstants.END_DOCUMENT) {
+                nextEvent = constructEvent(stream.next(), stream);
+            } else {
+                nextEvent = null;
+            }
         }
         log.log(Level.FINE, "nextEvent(): {0}", currentEvent);
         return currentEvent;
@@ -239,10 +230,6 @@ public class WbXmlEventReader implements XMLEventReader {
      */
     @Override
     public XMLEvent peek() throws XMLStreamException {
-        log.log(Level.FINE, "peek()");
-        if (!hasNext()) {
-            throw new XMLStreamException("The reader is depleted!");
-        }
         log.log(Level.FINE, "peek(): {0}", nextEvent);
         return nextEvent;
     }
