@@ -397,6 +397,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
         }
         // create a new current element with this tag
         current.setElement(new WbXmlElement(localName));
+        current.setNamespace(namespaceURI);
         // add the current element to the parent or to the doc
         if (parent != null && parent.getElement() != null) {
             parent.getElement().addContent(new WbXmlContent(current.getElement()));
@@ -428,7 +429,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
      */
     @Override
     public void writeEmptyElement(String namespaceURI, String localName) throws XMLStreamException {
-        writeEmptyElement(null, localName, null);
+        writeEmptyElement(null, localName, namespaceURI);
     }
 
     /**
@@ -443,7 +444,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
     public void writeEmptyElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
         log.log(Level.FINE, "writeEmptyElement({0}, {1}, {2})", 
                 new Object[]{prefix, localName, namespaceURI});
-        // supposing that you can write a xmlns in an empty tag
+        this.writeStartElement(prefix, localName, namespaceURI);
         calculateAndNextTag();
     }
     
@@ -743,7 +744,7 @@ public class WbXmlStreamWriter implements XMLStreamWriter {
             int idxEndRoot = dtd.indexOf(' ', idxRoot);
             int idxFPI = dtd.indexOf('"', idxEndRoot + 1) + 1;
             int idxEndFPI = dtd.indexOf('"', idxFPI);
-            if ( idxRoot > 0 && idxEndRoot > idxRoot && idxFPI > idxEndRoot && idxEndFPI > idxFPI) {
+            if (idxRoot > 0 && idxEndRoot > idxRoot && idxFPI > idxEndRoot && idxEndFPI > idxFPI) {
                 String root = dtd.substring(idxRoot, idxEndRoot).trim();
                 String fpi = dtd.substring(idxFPI, idxEndFPI);
                 // try first using the FPI

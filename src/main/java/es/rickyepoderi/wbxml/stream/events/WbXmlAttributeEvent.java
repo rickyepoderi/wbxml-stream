@@ -35,7 +35,6 @@
  */
 package es.rickyepoderi.wbxml.stream.events;
 
-import es.rickyepoderi.wbxml.document.WbXmlAttribute;
 import es.rickyepoderi.wbxml.stream.WbXmlStreamReader;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;
@@ -101,7 +100,7 @@ public class WbXmlAttributeEvent extends WbXmlEvent implements Attribute {
      * A flag indicating whether this attribute was actually specified in the 
      * start-tag of its element, or was defaulted from the schema. 
      * It always return true;
-     * @return 
+     * @return true if specified, false otherwise
      */
     @Override
     public boolean isSpecified() {

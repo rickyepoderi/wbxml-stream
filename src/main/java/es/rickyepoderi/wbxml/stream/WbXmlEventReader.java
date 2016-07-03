@@ -48,6 +48,7 @@ import java.io.InputStream;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.stream.EventFilter;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -90,9 +91,19 @@ public class WbXmlEventReader implements XMLEventReader {
     private XMLEvent currentEvent = null;
     
     /**
+     * The backup if we need to restore the internal stream reader.
+     */
+    private StreamRestorePoint backup;
+    
+    /**
      * The next event.
      */
     private XMLEvent nextEvent = null;
+    
+    /**
+     * Filter to use in the reader (if used).
+     */
+    private EventFilter filter = null;
     
     /**
      * Constructor using the WbXmlStreamReader.
@@ -102,6 +113,7 @@ public class WbXmlEventReader implements XMLEventReader {
         this.stream = stream;
         currentEvent = null;
         nextEvent = constructEvent(stream.getEventType(), stream);
+        this.advanceNextEvent();
     }
     
     /**
@@ -113,6 +125,7 @@ public class WbXmlEventReader implements XMLEventReader {
         stream = new WbXmlStreamReader(parser);
         currentEvent = null;
         nextEvent = constructEvent(stream.getEventType(), stream);
+        this.advanceNextEvent();
     }
     
     /**
@@ -136,6 +149,17 @@ public class WbXmlEventReader implements XMLEventReader {
         stream = new WbXmlStreamReader(is, definition);
         currentEvent = null;
         nextEvent = constructEvent(stream.getEventType(), stream);
+        this.advanceNextEvent();
+    }
+    
+    /**
+     * Assigns a filter to the current event reader.
+     * @param filter The filter to use
+     * @throws XMLStreamException Some error adjusting the next event
+     */
+    public void assignFilter(EventFilter filter) throws XMLStreamException {
+        this.filter = filter;
+        this.advanceNextEvent();
     }
     
     /**
@@ -185,6 +209,17 @@ public class WbXmlEventReader implements XMLEventReader {
         return event;
     }
     
+    private void advanceNextEvent() throws XMLStreamException {
+        if (filter != null) {
+            backup = stream.backup();
+            XMLEvent curr = this.currentEvent;
+            while (nextEvent != null && !filter.accept(nextEvent)) {
+                this.internalNextEvent();
+            }
+            this.currentEvent = curr;
+        }
+    }
+    
     /**
      * Get the next XMLEvent
      * @return The next event read from the stream
@@ -194,6 +229,20 @@ public class WbXmlEventReader implements XMLEventReader {
     @Override
     public XMLEvent nextEvent() throws XMLStreamException {
         log.log(Level.FINE, "nextEvent()");
+        this.internalNextEvent();
+        this.advanceNextEvent();
+        log.log(Level.FINE, "nextEvent(): {0}", currentEvent);
+        return currentEvent;
+    }
+    
+    /**
+     * Get the next XMLEvent internally. Just advancing one event.
+     * @return The next event read from the stream
+     * @throws XMLStreamException if there is an error with the underlying XML.
+     * @throws NoSuchElementException iteration has no more elements.
+     */
+    protected XMLEvent internalNextEvent() throws XMLStreamException {
+        log.log(Level.FINE, "internalNextEvent()");
         if (nextEvent == null) {
             throw new NoSuchElementException();
         } else {
@@ -204,7 +253,7 @@ public class WbXmlEventReader implements XMLEventReader {
                 nextEvent = null;
             }
         }
-        log.log(Level.FINE, "nextEvent(): {0}", currentEvent);
+        log.log(Level.FINE, "internalNextEvent(): {0}", currentEvent);
         return currentEvent;
     }
 
@@ -248,8 +297,13 @@ public class WbXmlEventReader implements XMLEventReader {
         if (!(currentEvent instanceof StartElement)) {
             throw new XMLStreamException("Not in a START_ELEMENT!");
         }
+        if (filter != null && backup != null) {
+            // the stream can be moved to the next valid event
+            stream.restore(backup);
+            nextEvent = constructEvent(stream.getEventType(), stream);
+        }
         StringBuilder sb = new StringBuilder();
-        XMLEvent event = this.nextEvent();
+        XMLEvent event = this.internalNextEvent();
         while (!(event instanceof EndElement)) {
             if (event instanceof Characters) {
                 Characters chars = (Characters) event;
@@ -258,8 +312,9 @@ public class WbXmlEventReader implements XMLEventReader {
                 throw new XMLStreamException("Another START_ELEMENT found while iterating!");
             }
             // all the rest are ignored
-            event = this.nextEvent();
+            event = this.internalNextEvent();
         }
+        this.advanceNextEvent();
         log.log(Level.FINE, "getElementText(): {0}", sb.toString());
         return sb.toString();
     }
@@ -276,7 +331,12 @@ public class WbXmlEventReader implements XMLEventReader {
     @Override
     public XMLEvent nextTag() throws XMLStreamException {
         log.log(Level.FINE, "nextTag()");
-        XMLEvent event = this.nextEvent();
+        if (filter != null && backup != null) {
+            // the stream can be moved to the next valid event
+            stream.restore(backup);
+            nextEvent = constructEvent(stream.getEventType(), stream);
+        }
+        XMLEvent event = this.internalNextEvent();
         while (!(event instanceof EndElement) && !(event instanceof StartElement)) {
             if (event instanceof Characters) {
                 Characters chars = (Characters) event;
@@ -284,8 +344,9 @@ public class WbXmlEventReader implements XMLEventReader {
                     throw new XMLStreamException("Non-ignorable CHARACTERS found!");
                 }
             }
-            event = this.nextEvent();
+            event = this.internalNextEvent();
         }
+        this.advanceNextEvent();
         log.log(Level.FINE, "nextTag(): {0}", event);
         return event;
     }

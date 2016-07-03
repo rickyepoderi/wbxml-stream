@@ -1,6 +1,37 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *    
+ * Linking this library statically or dynamically with other modules 
+ * is making a combined work based on this library. Thus, the terms and
+ * conditions of the GNU General Public License cover the whole
+ * combination.
+ *    
+ * As a special exception, the copyright holders of this library give 
+ * you permission to link this library with independent modules to 
+ * produce an executable, regardless of the license terms of these 
+ * independent modules, and to copy and distribute the resulting 
+ * executable under terms of your choice, provided that you also meet, 
+ * for each linked independent module, the terms and conditions of the 
+ * license of that module.  An independent module is a module which 
+ * is not derived from or based on this library.  If you modify this 
+ * library, you may extend this exception to your version of the 
+ * library, but you are not obligated to do so.  If you do not wish 
+ * to do so, delete this exception statement from your version.
+ *
+ * Project: github.com/rickyepoderi/wbxml-stream
+ * 
  */
 package es.rickyepoderi.wbxml.test;
 
@@ -10,12 +41,12 @@ import es.rickyepoderi.wbxml.stream.WbXmlInputFactory;
 import es.rickyepoderi.wbxml.stream.WbXmlOutputFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Iterator;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
+import javax.xml.stream.EventFilter;
+import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
@@ -26,7 +57,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.XMLEvent;
-import junit.framework.Assert;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
@@ -51,10 +82,7 @@ public class SiStAXTest {
      * 
      */
     
-    File wbxmlFile = null;
-    
     public SiStAXTest() {
-        wbxmlFile = new File("src/test/examples/si/si-001.wbxml");
     }
     
     private void readStreamLoop(InputStream in) throws Exception {
@@ -106,7 +134,7 @@ public class SiStAXTest {
         reader.close();
     }
     
-    private void readStreamNextElement(InputStream in) throws Exception {
+    private void readStreamNextTag(InputStream in) throws Exception {
         XMLInputFactory f = new WbXmlInputFactory();
         XMLStreamReader reader = f.createXMLStreamReader(in);
         // read next tag
@@ -126,6 +154,8 @@ public class SiStAXTest {
         Assert.assertEquals("1999-06-30T00:00:00Z", reader.getAttributeValue(null, "si-expires"));
         // read the element text and position to END "indication"
         Assert.assertEquals("You have 4 new emails", reader.getElementText());
+        // the getElementText sets the reader to end_element of indication
+        Assert.assertEquals(XMLStreamConstants.END_ELEMENT, reader.getEventType());
         // read next tag
         type = reader.nextTag();
         // "si" end
@@ -133,7 +163,7 @@ public class SiStAXTest {
         reader.close();
     }
     
-    private void readEventNextElement(InputStream in) throws Exception {
+    private void readEventNextTag(InputStream in) throws Exception {
         XMLInputFactory f = new WbXmlInputFactory();
         XMLEventReader reader = f.createXMLEventReader(in);
         // read next tag
@@ -199,8 +229,148 @@ public class SiStAXTest {
         Assert.assertEquals(XMLStreamConstants.END_ELEMENT, reader.next());
         // next end of si
         Assert.assertEquals(XMLStreamConstants.END_ELEMENT, reader.next());
-        // next end docuemnt
+        // next end document
         Assert.assertEquals(XMLStreamConstants.END_DOCUMENT, reader.next());
+        Assert.assertFalse(reader.hasNext());
+        reader.close();
+    }
+    
+    private void readFilteredStreamStartElement(InputStream in) throws Exception {
+        XMLInputFactory f = new WbXmlInputFactory();
+        XMLStreamReader reader = f.createXMLStreamReader(in);
+        StreamFilter filter = new StreamFilter() {
+            @Override
+            public boolean accept(XMLStreamReader reader) {
+                return reader.getEventType() == XMLStreamConstants.START_ELEMENT;
+            }
+        };
+        reader = f.createFilteredReader(reader, filter);
+        // it should be start document
+        Assert.assertEquals(XMLStreamConstants.START_DOCUMENT, reader.getEventType());
+        // read next => it should be "si"
+        Assert.assertEquals(XMLStreamConstants.START_ELEMENT, reader.next());
+        Assert.assertEquals("si", reader.getName().getLocalPart());
+        Assert.assertEquals(0, reader.getAttributeCount());
+        // next it should be "indication"
+        Assert.assertEquals(XMLStreamConstants.START_ELEMENT, reader.next());
+        Assert.assertEquals("indication", reader.getName().getLocalPart());
+        Assert.assertEquals(3, reader.getAttributeCount());
+        Assert.assertEquals("1999-06-25T15:23:15Z", reader.getAttributeValue(null, "created"));
+        Assert.assertEquals("http://www.xyz.com/email/123/abc.wml", reader.getAttributeValue(null, "href"));
+        Assert.assertEquals("1999-06-30T00:00:00Z", reader.getAttributeValue(null, "si-expires"));
+        Assert.assertEquals("You have 4 new emails", reader.getElementText());
+        Assert.assertEquals(XMLStreamConstants.END_ELEMENT, reader.getEventType());
+        // no more start elements
+        Assert.assertFalse(reader.hasNext());
+        reader.close();
+    }
+    
+    private void readFilteredEventStartElement(InputStream in) throws Exception {
+        XMLInputFactory f = new WbXmlInputFactory();
+        XMLEventReader reader = f.createXMLEventReader(in);
+        EventFilter filter = new EventFilter() {
+            @Override
+            public boolean accept(XMLEvent event) {
+                return event.isStartElement();
+            }
+        };
+        reader = f.createFilteredReader(reader, filter);
+        // read next => it should be "si"
+        XMLEvent event = reader.nextEvent();
+        Assert.assertEquals(XMLStreamConstants.START_ELEMENT, event.getEventType());
+        Assert.assertEquals("si", event.asStartElement().getName().getLocalPart());
+        Assert.assertFalse(event.asStartElement().getAttributes().hasNext());
+        // next it should be "indication"
+        event = reader.nextEvent();
+        Assert.assertEquals(XMLStreamConstants.START_ELEMENT, event.getEventType());
+        Assert.assertEquals("indication", event.asStartElement().getName().getLocalPart());
+        // check attributes
+        Iterator iter = event.asStartElement().getAttributes();
+        // href
+        Assert.assertTrue(iter.hasNext());
+        Attribute attr = (Attribute) iter.next();
+        Assert.assertEquals(new QName("href"), attr.getName());
+        Assert.assertEquals("http://www.xyz.com/email/123/abc.wml", attr.getValue());
+        // created
+        Assert.assertTrue(iter.hasNext());
+        attr = (Attribute) iter.next();
+        Assert.assertEquals(new QName("created"), attr.getName());
+        Assert.assertEquals("1999-06-25T15:23:15Z", attr.getValue());
+        // si-expires
+        Assert.assertTrue(iter.hasNext());
+        attr = (Attribute) iter.next();
+        Assert.assertEquals(new QName("si-expires"), attr.getName());
+        Assert.assertEquals("1999-06-30T00:00:00Z", attr.getValue());
+        // read the element text and position to END "indication"
+        Assert.assertEquals("You have 4 new emails", reader.getElementText());
+        // no more start elements
+        Assert.assertFalse(reader.hasNext());
+        reader.close();
+    }
+    
+    private void readFilteredStreamIndication(InputStream in) throws Exception {
+        XMLInputFactory f = new WbXmlInputFactory();
+        XMLStreamReader reader = f.createXMLStreamReader(in);
+        StreamFilter filter = new StreamFilter() {
+            @Override
+            public boolean accept(XMLStreamReader reader) {
+                return reader.getEventType() == XMLStreamConstants.START_ELEMENT &&
+                        "indication".equals(reader.getName().getLocalPart());
+            }
+        };
+        reader = f.createFilteredReader(reader, filter);
+        // it should be start document
+        Assert.assertEquals(XMLStreamConstants.START_DOCUMENT, reader.getEventType());
+        // next it should be "indication" cos the filter just read this element
+        Assert.assertEquals(XMLStreamConstants.START_ELEMENT, reader.next());
+        Assert.assertEquals("indication", reader.getName().getLocalPart());
+        Assert.assertEquals(3, reader.getAttributeCount());
+        Assert.assertEquals("1999-06-25T15:23:15Z", reader.getAttributeValue(null, "created"));
+        Assert.assertEquals("http://www.xyz.com/email/123/abc.wml", reader.getAttributeValue(null, "href"));
+        Assert.assertEquals("1999-06-30T00:00:00Z", reader.getAttributeValue(null, "si-expires"));
+        Assert.assertEquals("You have 4 new emails", reader.getElementText());
+        Assert.assertEquals(XMLStreamConstants.END_ELEMENT, reader.getEventType());
+        // no more start elements
+        Assert.assertFalse(reader.hasNext());
+        reader.close();
+    }
+    
+    private void readFilteredEventIndication(InputStream in) throws Exception {
+        XMLInputFactory f = new WbXmlInputFactory();
+        XMLEventReader reader = f.createXMLEventReader(in);
+        EventFilter filter = new EventFilter() {
+            @Override
+            public boolean accept(XMLEvent event) {
+                return event.isStartElement() &&
+                        "indication".equals(event.asStartElement().getName().getLocalPart());
+            }
+        };
+        reader = f.createFilteredReader(reader, filter);
+        // next it should be "indication" cos the filter just read this element
+        XMLEvent event = reader.nextEvent();
+        Assert.assertEquals(XMLStreamConstants.START_ELEMENT, event.getEventType());
+        Assert.assertEquals("indication", event.asStartElement().getName().getLocalPart());
+        // check attributes
+        Iterator iter = event.asStartElement().getAttributes();
+        // href
+        Assert.assertTrue(iter.hasNext());
+        Attribute attr = (Attribute) iter.next();
+        Assert.assertEquals(new QName("href"), attr.getName());
+        Assert.assertEquals("http://www.xyz.com/email/123/abc.wml", attr.getValue());
+        // created
+        Assert.assertTrue(iter.hasNext());
+        attr = (Attribute) iter.next();
+        Assert.assertEquals(new QName("created"), attr.getName());
+        Assert.assertEquals("1999-06-25T15:23:15Z", attr.getValue());
+        // si-expires
+        Assert.assertTrue(iter.hasNext());
+        attr = (Attribute) iter.next();
+        Assert.assertEquals(new QName("si-expires"), attr.getName());
+        Assert.assertEquals("1999-06-30T00:00:00Z", attr.getValue());
+        // read the element text and position to END "indication"
+        Assert.assertEquals("You have 4 new emails", reader.getElementText());
+        // no more start elements
+        Assert.assertFalse(reader.hasNext());
         reader.close();
     }
     
@@ -248,6 +418,7 @@ public class SiStAXTest {
         // next end docuemnt
         event = reader.nextEvent();
         Assert.assertEquals(XMLStreamConstants.END_DOCUMENT, event.getEventType());
+        Assert.assertFalse(reader.hasNext());
         reader.close();
     }
     
@@ -309,7 +480,9 @@ public class SiStAXTest {
         byte[] si = this.writeStream();
         this.readStreamLoop(new ByteArrayInputStream(si));
         this.readStreamNext(new ByteArrayInputStream(si));
-        this.readStreamNextElement(new ByteArrayInputStream(si));
+        this.readStreamNextTag(new ByteArrayInputStream(si));
+        this.readFilteredStreamStartElement(new ByteArrayInputStream(si));
+        this.readFilteredStreamIndication(new ByteArrayInputStream(si));
     }
     
     @Test(groups = {"stax", "event"} )
@@ -317,7 +490,9 @@ public class SiStAXTest {
         byte[] si = this.writeEvent();
         this.readEventLoop(new ByteArrayInputStream(si));
         this.readEventNext(new ByteArrayInputStream(si));
-        this.readEventNextElement(new ByteArrayInputStream(si));
+        this.readEventNextTag(new ByteArrayInputStream(si));
+        this.readFilteredEventStartElement(new ByteArrayInputStream(si));
+        this.readFilteredEventIndication(new ByteArrayInputStream(si));
     }
     
 }

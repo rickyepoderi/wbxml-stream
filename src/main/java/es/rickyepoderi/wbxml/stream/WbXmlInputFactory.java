@@ -302,7 +302,7 @@ public class WbXmlInputFactory extends XMLInputFactory {
      */
     @Override
     public XMLStreamReader createFilteredReader(XMLStreamReader reader, StreamFilter filter) throws XMLStreamException {
-        throw new UnsupportedOperationException("Not supported!");
+        return new WbXmlFilterStreamReader((WbXmlStreamReader) reader, filter);
     }
 
     /**
@@ -315,7 +315,8 @@ public class WbXmlInputFactory extends XMLInputFactory {
      */
     @Override
     public XMLEventReader createFilteredReader(XMLEventReader reader, EventFilter filter) throws XMLStreamException {
-        throw new UnsupportedOperationException("Not supported!");
+        ((WbXmlEventReader)reader).assignFilter(filter);
+        return reader;
     }
 
     /**

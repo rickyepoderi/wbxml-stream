@@ -80,6 +80,7 @@ import javax.xml.stream.XMLStreamReader;
  * over the attributes too.</p>
  * 
  * @author ricky
+ * @see XMLStreamReader
  */
 public class WbXmlStreamReader implements XMLStreamReader {
 
@@ -105,7 +106,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
     private WbXmlParser parser;
     
     /**
-     * Queue of elements to ietarte over all childs.
+     * Queue of elements to iterate over all children.
      */
     private Deque<ElementIndex> parents;
     
@@ -123,7 +124,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
      * Little class to maintain the position of the reader. The position is
      * the current element and the current index in the contents of that element.
      */
-    private class ElementIndex {
+    static protected class ElementIndex {
         
         /**
          * Current element of the WBXML representation.
@@ -139,6 +140,34 @@ public class WbXmlStreamReader implements XMLStreamReader {
          * The index of the attribute of the current element.
          */
         Integer attrIdx;
+        
+        /**
+         * Empty constructor.
+         */
+        public ElementIndex() {
+            // no-op
+        }
+        
+        /**
+         * Copy constructor.
+         * @param el The element index to copy
+         */
+        public ElementIndex(ElementIndex el) {
+            this.currentElement = el.currentElement;
+            this.index = el.index;
+            this.attrIdx = el.attrIdx;
+        }
+        
+        @Override
+        public String toString() {
+            return new StringBuilder()
+                .append(currentElement == null? "null" : currentElement.getTag())
+                .append(" ")
+                .append(index)
+                .append(" ")
+                .append(attrIdx)
+                .toString();
+        }
     }
     
     /**
@@ -233,6 +262,24 @@ public class WbXmlStreamReader implements XMLStreamReader {
         return this.nsctx;
     }
     
+    /**
+     * Perform a copy of the current state of the reader in order to come
+     * back to this position in the future. Needed by filtered processing.
+     * @return The restore point object
+     */
+    public StreamRestorePoint backup() {
+        return new StreamRestorePoint(event, parents, elementIndex);
+    }
+    
+    /**
+     * The stream is moved to the position marked by the restore point.
+     * @param backup A restore point taken before
+     */
+    public void restore(StreamRestorePoint backup) {
+        this.event = backup.getEvent();
+        this.parents = backup.getParents();
+        this.elementIndex = backup.getElementIndex();
+    }
     
     //
     // XMLStreamReader methods
@@ -435,7 +482,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
                 event = nextInElement();
             }
         } else if (event == END_DOCUMENT) {
-            throw new XMLStreamException("End of coument reached!");
+            throw new XMLStreamException("End of document reached!");
         } else {
             throw new XMLStreamException("Invalid event state!");
         }
