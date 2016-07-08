@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>es.rickyepoderi.wbxml</groupId>
   <artifactId>wbxml-stream</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
   <packaging>bundle</packaging>
   <name>wbxml-stream</name>
   <url>https://github.com/rickyepoderi/wbxml-stream</url>
