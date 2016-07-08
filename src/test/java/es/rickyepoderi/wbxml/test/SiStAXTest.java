@@ -42,7 +42,9 @@ import es.rickyepoderi.wbxml.stream.WbXmlOutputFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.EventFilter;
@@ -179,21 +181,25 @@ public class SiStAXTest {
         Assert.assertEquals("indication", event.asStartElement().getName().getLocalPart());
         // check attributes
         Iterator iter = event.asStartElement().getAttributes();
-        // href
+        // order of attribute is not guarantied
+        Map<String, String> attrs = new HashMap<String,String>(3);
+        attrs.put("href", "http://www.xyz.com/email/123/abc.wml");
+        attrs.put("created", "1999-06-25T15:23:15Z");
+        attrs.put("si-expires", "1999-06-30T00:00:00Z");
+        // one
         Assert.assertTrue(iter.hasNext());
         Attribute attr = (Attribute) iter.next();
-        Assert.assertEquals(new QName("href"), attr.getName());
-        Assert.assertEquals("http://www.xyz.com/email/123/abc.wml", attr.getValue());
-        // created
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // two
         Assert.assertTrue(iter.hasNext());
         attr = (Attribute) iter.next();
-        Assert.assertEquals(new QName("created"), attr.getName());
-        Assert.assertEquals("1999-06-25T15:23:15Z", attr.getValue());
-        // si-expires
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // three
         Assert.assertTrue(iter.hasNext());
         attr = (Attribute) iter.next();
-        Assert.assertEquals(new QName("si-expires"), attr.getName());
-        Assert.assertEquals("1999-06-30T00:00:00Z", attr.getValue());
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // all attributes hasben read ok
+        Assert.assertTrue(attrs.isEmpty());
         // read the element text and position to END "indication"
         Assert.assertEquals("You have 4 new emails", reader.getElementText());
         // read next tag => "si" end
@@ -218,10 +224,6 @@ public class SiStAXTest {
         Assert.assertEquals("1999-06-25T15:23:15Z", reader.getAttributeValue(null, "created"));
         Assert.assertEquals("http://www.xyz.com/email/123/abc.wml", reader.getAttributeValue(null, "href"));
         Assert.assertEquals("1999-06-30T00:00:00Z", reader.getAttributeValue(null, "si-expires"));
-        // now three attributes
-        Assert.assertEquals(XMLStreamConstants.ATTRIBUTE, reader.next());
-        Assert.assertEquals(XMLStreamConstants.ATTRIBUTE, reader.next());
-        Assert.assertEquals(XMLStreamConstants.ATTRIBUTE, reader.next());
         // read the element text and position to END "indication"
         Assert.assertEquals(XMLStreamConstants.CHARACTERS, reader.next());
         Assert.assertEquals("You have 4 new emails", reader.getText());
@@ -286,21 +288,25 @@ public class SiStAXTest {
         Assert.assertEquals("indication", event.asStartElement().getName().getLocalPart());
         // check attributes
         Iterator iter = event.asStartElement().getAttributes();
-        // href
+        // order of attribute is not guarantied
+        Map<String, String> attrs = new HashMap<String,String>(3);
+        attrs.put("href", "http://www.xyz.com/email/123/abc.wml");
+        attrs.put("created", "1999-06-25T15:23:15Z");
+        attrs.put("si-expires", "1999-06-30T00:00:00Z");
+        // one
         Assert.assertTrue(iter.hasNext());
         Attribute attr = (Attribute) iter.next();
-        Assert.assertEquals(new QName("href"), attr.getName());
-        Assert.assertEquals("http://www.xyz.com/email/123/abc.wml", attr.getValue());
-        // created
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // two
         Assert.assertTrue(iter.hasNext());
         attr = (Attribute) iter.next();
-        Assert.assertEquals(new QName("created"), attr.getName());
-        Assert.assertEquals("1999-06-25T15:23:15Z", attr.getValue());
-        // si-expires
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // three
         Assert.assertTrue(iter.hasNext());
         attr = (Attribute) iter.next();
-        Assert.assertEquals(new QName("si-expires"), attr.getName());
-        Assert.assertEquals("1999-06-30T00:00:00Z", attr.getValue());
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // all attributes hasben read ok
+        Assert.assertTrue(attrs.isEmpty());
         // read the element text and position to END "indication"
         Assert.assertEquals("You have 4 new emails", reader.getElementText());
         // no more start elements
@@ -352,21 +358,25 @@ public class SiStAXTest {
         Assert.assertEquals("indication", event.asStartElement().getName().getLocalPart());
         // check attributes
         Iterator iter = event.asStartElement().getAttributes();
-        // href
+        // order of attribute is not guarantied
+        Map<String, String> attrs = new HashMap<String,String>(3);
+        attrs.put("href", "http://www.xyz.com/email/123/abc.wml");
+        attrs.put("created", "1999-06-25T15:23:15Z");
+        attrs.put("si-expires", "1999-06-30T00:00:00Z");
+        // one
         Assert.assertTrue(iter.hasNext());
         Attribute attr = (Attribute) iter.next();
-        Assert.assertEquals(new QName("href"), attr.getName());
-        Assert.assertEquals("http://www.xyz.com/email/123/abc.wml", attr.getValue());
-        // created
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // two
         Assert.assertTrue(iter.hasNext());
         attr = (Attribute) iter.next();
-        Assert.assertEquals(new QName("created"), attr.getName());
-        Assert.assertEquals("1999-06-25T15:23:15Z", attr.getValue());
-        // si-expires
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // three
         Assert.assertTrue(iter.hasNext());
         attr = (Attribute) iter.next();
-        Assert.assertEquals(new QName("si-expires"), attr.getName());
-        Assert.assertEquals("1999-06-30T00:00:00Z", attr.getValue());
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // all attributes hasben read ok
+        Assert.assertTrue(attrs.isEmpty());
         // read the element text and position to END "indication"
         Assert.assertEquals("You have 4 new emails", reader.getElementText());
         // no more start elements
@@ -388,21 +398,27 @@ public class SiStAXTest {
         event = reader.nextEvent();
         Assert.assertEquals(XMLStreamConstants.START_ELEMENT, event.getEventType());
         Assert.assertEquals("indication", event.asStartElement().getName().getLocalPart());
-        // next it should be attribute href
-        event = reader.nextEvent();
-        Assert.assertEquals(XMLStreamConstants.ATTRIBUTE, event.getEventType());
-        Assert.assertEquals(new QName("href"), ((Attribute)event).getName());
-        Assert.assertEquals("http://www.xyz.com/email/123/abc.wml", ((Attribute)event).getValue());
-        // next it should be attribute created
-        event = reader.nextEvent();
-        Assert.assertEquals(XMLStreamConstants.ATTRIBUTE, event.getEventType());
-        Assert.assertEquals(new QName("created"), ((Attribute)event).getName());
-        Assert.assertEquals("1999-06-25T15:23:15Z", ((Attribute)event).getValue());
-        // next it should be attribute attribute si-expires
-        event = reader.nextEvent();
-        Assert.assertEquals(XMLStreamConstants.ATTRIBUTE, event.getEventType());
-        Assert.assertEquals(new QName("si-expires"), ((Attribute)event).getName());
-        Assert.assertEquals("1999-06-30T00:00:00Z", ((Attribute)event).getValue());
+        // check attributes
+        Iterator iter = event.asStartElement().getAttributes();
+        // order of attribute is not guarantied
+        Map<String, String> attrs = new HashMap<String,String>(3);
+        attrs.put("href", "http://www.xyz.com/email/123/abc.wml");
+        attrs.put("created", "1999-06-25T15:23:15Z");
+        attrs.put("si-expires", "1999-06-30T00:00:00Z");
+        // one
+        Assert.assertTrue(iter.hasNext());
+        Attribute attr = (Attribute) iter.next();
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // two
+        Assert.assertTrue(iter.hasNext());
+        attr = (Attribute) iter.next();
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // three
+        Assert.assertTrue(iter.hasNext());
+        attr = (Attribute) iter.next();
+        Assert.assertEquals(attrs.remove(attr.getName().getLocalPart()), attr.getValue());
+        // all attributes hasben read ok
+        Assert.assertTrue(attrs.isEmpty());
         // read the element text
         event = reader.nextEvent();
         Assert.assertEquals(XMLStreamConstants.CHARACTERS, event.getEventType());

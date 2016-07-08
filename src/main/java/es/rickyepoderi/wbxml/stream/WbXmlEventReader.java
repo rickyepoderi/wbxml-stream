@@ -37,12 +37,6 @@ package es.rickyepoderi.wbxml.stream;
 
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
 import es.rickyepoderi.wbxml.document.WbXmlParser;
-import es.rickyepoderi.wbxml.stream.events.WbXmlAttributeEvent;
-import es.rickyepoderi.wbxml.stream.events.WbXmlCharactersEvent;
-import es.rickyepoderi.wbxml.stream.events.WbXmlEndDocumentEvent;
-import es.rickyepoderi.wbxml.stream.events.WbXmlEndElementEvent;
-import es.rickyepoderi.wbxml.stream.events.WbXmlStartDocumentEvent;
-import es.rickyepoderi.wbxml.stream.events.WbXmlStartElementEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.NoSuchElementException;
@@ -56,6 +50,7 @@ import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.stream.util.XMLEventAllocator;
 
 /**
  * <p>Class that implements the XMlEventReader for the WbXML format. It uses
@@ -106,50 +101,60 @@ public class WbXmlEventReader implements XMLEventReader {
     private EventFilter filter = null;
     
     /**
+     * The XMLEventAllocator used to parse the stream reader.
+     * NOTE: The StAX API (weird) has no method to obtain the default
+     *       event allocator (no factory), so one is provided by wbxml-stream
+     */
+    private XMLEventAllocator allocator = null;
+    
+    /**
      * Constructor using the WbXmlStreamReader.
      * @param stream The stream reader not modified after creation.
+     * @param allocator The allocator to use to parse the stream
      */
-    public WbXmlEventReader(WbXmlStreamReader stream) throws XMLStreamException {
+    public WbXmlEventReader(WbXmlStreamReader stream, XMLEventAllocator allocator) throws XMLStreamException {
         this.stream = stream;
+        this.allocator = allocator;
         currentEvent = null;
-        nextEvent = constructEvent(stream.getEventType(), stream);
+        nextEvent = constructEvent(stream);
         this.advanceNextEvent();
     }
     
     /**
      * Constructor using a previously parsed parser.
      * @param parser The parser which already has parsed a WBXML file
+     * @param allocator The allocator to use to parse the stream
      * @throws XMLStreamException Some error with the parsing
      */
-    public WbXmlEventReader(WbXmlParser parser) throws XMLStreamException {
+    public WbXmlEventReader(WbXmlParser parser, XMLEventAllocator allocator) throws XMLStreamException {
         stream = new WbXmlStreamReader(parser);
+        this.allocator = allocator;
         currentEvent = null;
-        nextEvent = constructEvent(stream.getEventType(), stream);
+        nextEvent = constructEvent(stream);
         this.advanceNextEvent();
     }
     
     /**
      * Constructor using only the input stream. Definition guessed.
      * @param is The InputStream to read the WBXML
+     * @param allocator The allocator to use to parse the stream
      * @throws IOException Some exception with the file
      * @throws XMLStreamException Some exception with the parsing
      */
-    public WbXmlEventReader(InputStream is) throws IOException, XMLStreamException {
-        this(is, null);
+    public WbXmlEventReader(InputStream is, XMLEventAllocator allocator) throws IOException, XMLStreamException {
+        this(is, null, allocator);
     }
     
     /**
      * Constructor using all the possible parameters.
      * @param is The InputStream to read the WBXML
      * @param definition The definition to use (forced). If null it is guessed.
+     * @param allocator The allocator to use to parse the stream
      * @throws IOException Some exception with the file
      * @throws XMLStreamException Some exception with the parsing
      */
-    public WbXmlEventReader(InputStream is, WbXmlDefinition definition) throws IOException, XMLStreamException {
-        stream = new WbXmlStreamReader(is, definition);
-        currentEvent = null;
-        nextEvent = constructEvent(stream.getEventType(), stream);
-        this.advanceNextEvent();
+    public WbXmlEventReader(InputStream is, WbXmlDefinition definition, XMLEventAllocator allocator) throws IOException, XMLStreamException {
+        this(new WbXmlStreamReader(is, definition), allocator);
     }
     
     /**
@@ -172,40 +177,15 @@ public class WbXmlEventReader implements XMLEventReader {
     
     /**
      * Constructs the events based on the one read from the XMLStreamWriter.
-     * @param eventType The type event of the next event
      * @param stream The stream at the correct point of reading
      * @return The next event constructed based on the next element
      * @throws XMLStreamException Some error
      */
-    static private XMLEvent constructEvent(int eventType, WbXmlStreamReader stream
+    private XMLEvent constructEvent(WbXmlStreamReader stream
             ) throws XMLStreamException {
         log.log(Level.FINE, "constructEvent()");
-        XMLEvent event;
-        switch (eventType) {
-            case XMLStreamConstants.START_DOCUMENT:
-                event = new WbXmlStartDocumentEvent(stream);
-                break;
-            case XMLStreamConstants.END_DOCUMENT:
-                event = new WbXmlEndDocumentEvent(stream);
-                break;
-            case XMLStreamConstants.START_ELEMENT:
-                event = new WbXmlStartElementEvent(stream);
-                break;
-            case XMLStreamConstants.END_ELEMENT:
-                event = new WbXmlEndElementEvent(stream);
-                break;
-            case XMLStreamConstants.ATTRIBUTE:
-                event = new WbXmlAttributeEvent(stream, stream.getCurrentAttributeIndex());
-                break;
-            case XMLStreamConstants.CHARACTERS:
-            case XMLStreamConstants.CDATA:
-                event = new WbXmlCharactersEvent(stream);
-                break;
-            default:
-                throw new UnsupportedOperationException(
-                        String.format("The %d event is not supported yet", eventType));
-        }
-        log.log(Level.FINE, "constructEvent(): {0}", event);
+        XMLEvent event = allocator.allocate(stream);
+        log.log(Level.FINE, "constructEvent(): {0} {1}", new Object[]{event.getEventType(), event});
         return event;
     }
     
@@ -248,7 +228,8 @@ public class WbXmlEventReader implements XMLEventReader {
         } else {
             currentEvent = nextEvent;
             if (currentEvent.getEventType() != XMLStreamConstants.END_DOCUMENT) {
-                nextEvent = constructEvent(stream.next(), stream);
+                stream.next();
+                nextEvent = constructEvent(stream);
             } else {
                 nextEvent = null;
             }
@@ -300,7 +281,7 @@ public class WbXmlEventReader implements XMLEventReader {
         if (filter != null && backup != null) {
             // the stream can be moved to the next valid event
             stream.restore(backup);
-            nextEvent = constructEvent(stream.getEventType(), stream);
+            nextEvent = constructEvent(stream);
         }
         StringBuilder sb = new StringBuilder();
         XMLEvent event = this.internalNextEvent();
@@ -334,7 +315,7 @@ public class WbXmlEventReader implements XMLEventReader {
         if (filter != null && backup != null) {
             // the stream can be moved to the next valid event
             stream.restore(backup);
-            nextEvent = constructEvent(stream.getEventType(), stream);
+            nextEvent = constructEvent(stream);
         }
         XMLEvent event = this.internalNextEvent();
         while (!(event instanceof EndElement) && !(event instanceof StartElement)) {

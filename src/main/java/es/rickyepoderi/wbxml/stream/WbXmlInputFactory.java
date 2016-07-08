@@ -36,6 +36,7 @@
 package es.rickyepoderi.wbxml.stream;
 
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
+import es.rickyepoderi.wbxml.stream.events.WbXmlEventAllocator;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -43,6 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.xml.stream.EventFilter;
 import javax.xml.stream.StreamFilter;
+import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLReporter;
@@ -61,6 +63,8 @@ import javax.xml.transform.stream.StreamSource;
  * <ul>
  * <li>es.rickyepoderi.wbxml.stream.definition: The definition to force. It
  * should be a WbXmlDefinition (by default is null, no forced definition).</li>
+ * <li>javax.xml.stream.allocator: The XMLEventAllocator to use (null by
+ * default, which is the internal <em>WbXmlStreamReader</em>).</li>
  * </ul>
  * 
  * @author ricky
@@ -207,6 +211,20 @@ public class WbXmlInputFactory extends XMLInputFactory {
     }
 
     /**
+     * Method that return the internal event allocator. It's the same than
+     * getting the property <em>javax.xml.stream.allocator</em>.
+     * @return The allocator used or null if none
+     */
+    protected XMLEventAllocator getInternalAllocator() {
+        XMLEventAllocator allocator = this.getEventAllocator();
+        if (allocator == null) {
+            // create the wbxml-stream default allocator for events
+            allocator = new WbXmlEventAllocator(XMLEventFactory.newFactory());
+        }
+        return allocator;
+    }
+    
+    /**
      * Create a new XMLEventReader from an XMLStreamReader. After being used to
      * construct the XMLEventReader instance returned from this method the
      * XMLStreamReader must not be used. It only admits WbXmlStreamReader.
@@ -217,7 +235,7 @@ public class WbXmlInputFactory extends XMLInputFactory {
      */
     @Override
     public XMLEventReader createXMLEventReader(XMLStreamReader reader) throws XMLStreamException {
-        return new WbXmlEventReader((WbXmlStreamReader) reader);
+        return new WbXmlEventReader((WbXmlStreamReader) reader, getInternalAllocator());
     }
 
     /**
@@ -233,7 +251,8 @@ public class WbXmlInputFactory extends XMLInputFactory {
             if (source instanceof StreamSource) {
                 StreamSource ss = (StreamSource) source;
                 return new WbXmlEventReader(ss.getInputStream(),
-                        (WbXmlDefinition) props.get(DEFINITION_PROPERTY));
+                        (WbXmlDefinition) props.get(DEFINITION_PROPERTY),
+                getInternalAllocator());
             } else {
                 throw new XMLStreamException("WBXML only support StreamSource with InputStream!");
             }
@@ -252,7 +271,8 @@ public class WbXmlInputFactory extends XMLInputFactory {
     public XMLEventReader createXMLEventReader(InputStream in) throws XMLStreamException {
         try {
             return new WbXmlEventReader(in,
-                    (WbXmlDefinition) props.get(DEFINITION_PROPERTY));
+                    (WbXmlDefinition) props.get(DEFINITION_PROPERTY),
+                    getInternalAllocator());
         } catch (IOException e) {
             throw new XMLStreamException(e);
         }
@@ -269,7 +289,8 @@ public class WbXmlInputFactory extends XMLInputFactory {
     public XMLEventReader createXMLEventReader(InputStream in, String encoding) throws XMLStreamException {
         try {
             return new WbXmlEventReader(in,
-                    (WbXmlDefinition) props.get(DEFINITION_PROPERTY));
+                    (WbXmlDefinition) props.get(DEFINITION_PROPERTY),
+                    getInternalAllocator());
         } catch (IOException e) {
             throw new XMLStreamException(e);
         }
@@ -286,7 +307,8 @@ public class WbXmlInputFactory extends XMLInputFactory {
     public XMLEventReader createXMLEventReader(String systemId, InputStream in) throws XMLStreamException {
         try {
             return new WbXmlEventReader(in,
-                    (WbXmlDefinition) props.get(DEFINITION_PROPERTY));
+                    (WbXmlDefinition) props.get(DEFINITION_PROPERTY),
+                    getInternalAllocator());
         } catch (IOException e) {
             throw new XMLStreamException(e);
         }
@@ -373,6 +395,8 @@ public class WbXmlInputFactory extends XMLInputFactory {
     public void setProperty(String name, Object value) throws IllegalArgumentException {
         if (DEFINITION_PROPERTY.equals(name)) {
            props.put(name, (WbXmlDefinition) value);
+       } else if (XMLInputFactory.ALLOCATOR.equals(name)) {
+           props.put(name, (XMLEventAllocator) value);
        } else {
            throw new IllegalArgumentException(String.format("Invalid property %s", name));
        }
@@ -399,26 +423,25 @@ public class WbXmlInputFactory extends XMLInputFactory {
      */
     @Override
     public boolean isPropertySupported(String name) {
-        return DEFINITION_PROPERTY.equals(name);
+        return DEFINITION_PROPERTY.equals(name) || XMLInputFactory.ALLOCATOR.equals(name);
     }
 
     /**
-     * Set a user defined event allocator for events. Nothing is set.
+     * Set a user defined event allocator for events.
      * @param allocator The new allocator
      */
     @Override
     public void setEventAllocator(XMLEventAllocator allocator) {
-        // nothing
+        props.put(XMLInputFactory.ALLOCATOR, allocator);
     }
 
     /**
-     * Gets the allocator used by streams created with this factory. It 
-     * always returns null.
+     * Gets the allocator used by streams created with this factory. 
      * @return  The allocator
      */
     @Override
     public XMLEventAllocator getEventAllocator() {
-        return null;
+        return (XMLEventAllocator) props.get(XMLInputFactory.ALLOCATOR);
     }
     
 }

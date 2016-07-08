@@ -74,10 +74,13 @@ import javax.xml.stream.XMLStreamReader;
  * elements is also maintained to iterate over all the elements in document 
  * parsed.</p>
  * 
- * <p>Implementing the WbXmlEventReader it was discovered that ATTRIBUTE 
- * event type should be returned as many times as attributes are in the
- * element. A new attrIdx was added to the ElementIndex just to iterate
- * over the attributes too.</p>
+ * <p>Finally the ATTRIBUTE event should not be trigger in the parsing. As
+ * it is said in this javadoc: "Attributes are reported as a set of events 
+ * accessible from a StartElement. Other applications may report Attributes 
+ * as first-order events, for example as the results of an XPath expression".
+ * So I think it is clear that ATTRIUBUTE event should not be reported in a
+ * stream or event reader. The work done before to add it has been removed 
+ * again and no ATTRIBUTE event is returned.</p>
  * 
  * @author ricky
  * @see XMLStreamReader
@@ -137,11 +140,6 @@ public class WbXmlStreamReader implements XMLStreamReader {
         Integer index;
         
         /**
-         * The index of the attribute of the current element.
-         */
-        Integer attrIdx;
-        
-        /**
          * Empty constructor.
          */
         public ElementIndex() {
@@ -155,7 +153,6 @@ public class WbXmlStreamReader implements XMLStreamReader {
         public ElementIndex(ElementIndex el) {
             this.currentElement = el.currentElement;
             this.index = el.index;
-            this.attrIdx = el.attrIdx;
         }
         
         @Override
@@ -164,8 +161,6 @@ public class WbXmlStreamReader implements XMLStreamReader {
                 .append(currentElement == null? "null" : currentElement.getTag())
                 .append(" ")
                 .append(index)
-                .append(" ")
-                .append(attrIdx)
                 .toString();
         }
     }
@@ -244,14 +239,6 @@ public class WbXmlStreamReader implements XMLStreamReader {
      */
     public WbXmlElement getCurrentElement() {
         return this.elementIndex.currentElement;
-    }
-    
-    /**
-     * Getter for the current attribute index
-     * @return The current attribute index
-     */
-    public Integer getCurrentAttributeIndex() {
-        return this.elementIndex.attrIdx;
     }
     
     /**
@@ -369,11 +356,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
      * @return The next element following the commented process
      */
     private int nextInElement() {
-        if (elementIndex.attrIdx != null && 
-                elementIndex.currentElement.attributesSize() > elementIndex.attrIdx) {
-            // there are still attributes in the element
-            event = ATTRIBUTE;
-        } else if (elementIndex.index != null &&
+        if (elementIndex.index != null &&
                 elementIndex.currentElement.contentsSize() > elementIndex.index) {
             // get the index content and guess event type
             WbXmlContent content = elementIndex.currentElement.getContent(elementIndex.index);
@@ -388,7 +371,6 @@ public class WbXmlStreamReader implements XMLStreamReader {
                 elementIndex = new ElementIndex();
                 elementIndex.currentElement = content.getElement();
                 elementIndex.index = null;
-                elementIndex.attrIdx = null;
                 event = START_ELEMENT;
             }
         } else {
@@ -444,21 +426,15 @@ public class WbXmlStreamReader implements XMLStreamReader {
     public int next() throws XMLStreamException {
         log.fine("next()");
         // possible states: START_DOCUMENT PROCESSING_INSTRUCTION 
-        //                  START_ELEMENT ATTRIBUTE CHARACTERS END_ELEMENT
+        //                  START_ELEMENT CHARACTERS END_ELEMENT
         //                  SPACE END_DOCUMENT ENTITY_REFERENCE
         if (event == START_DOCUMENT) {
             // point to the first element in the doc or pi
             event = START_ELEMENT;
             elementIndex.currentElement = parser.getDocument().getBody().getElement();
         } else if (event == START_ELEMENT) {
-            // the next can be END_ELEMENT, ATTRIBUTE, CAHARACTERS, PROCESSING_INSTRUCTION
+            // the next can be END_ELEMENT, CAHARACTERS, PROCESSING_INSTRUCTION
             elementIndex.index = 0;
-            elementIndex.attrIdx = 0;
-            event = nextInElement();
-        } else if (event == ATTRIBUTE) {
-            // the nest event can be CHARACTERS PROCESSING_INSTRUCTION
-            elementIndex.index = 0;
-            elementIndex.attrIdx++;
             event = nextInElement();
         } else if (event == CHARACTERS) {
             elementIndex.index++;
