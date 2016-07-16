@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC
+    "-//WAPFORUM//DTD WML 1.3//EN"
+    "http://www.wapforum.org/DTD/wml13.dtd">
+
+<wml>
+    <card title="Pizza Toppings">
+        <p>Choose your toppings:
+        <select name="toppings" multiple="true">
+            <option value="p">Pepperoni</option>
+            <option value="h">Ham</option>
+            <option value="b">Spicy Beef</option>
+            <option value="a">Anchovies</option>
+            <option value="c">Chillies</option>
+            <option value="o">Olives</option>
+            <option value="m">Mushrooms</option>
+            <!-- ...lots more toppings here... -->
+        </select></p>
+        <do type="accept" label="Order">
+            <go href="order?toppings=$(toppings:e)"/>
+        </do>
+    </card>
+</wml>

@@ -484,7 +484,7 @@ public class WbXmlInitialization {
                     def.addNamespace(ns);
                 }
             } else if (key.startsWith(PROP_WBXML_ATTR_PREFIX) &&
-                    !key.endsWith(PROP_WBXML_VALUE_SUFFIX)) {
+                    !key.matches(Pattern.quote(PROP_WBXML_ATTR_PREFIX) + ".*\\..*" + Pattern.quote(PROP_WBXML_VALUE_SUFFIX))) {
                 WbXmlAttributeDef attr = getAttrDefinition(props, key, props.getProperty(key));
                 if (attr != null) {
                     def.addAttr(attr);

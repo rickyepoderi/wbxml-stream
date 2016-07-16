@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC
+    "-//WAPFORUM//DTD WML 1.3//EN"
+    "http://www.wapforum.org/DTD/wml13.dtd">
+
+<wml>
+    <card title="Reset on reentry example">
+        <!-- Reset fields when entered backwards. -->
+        <onevent type="onenterbackward">
+            <refresh>
+                <setvar name="login" value=""/>
+                <setvar name="password" value=""/>
+            </refresh>
+        </onevent>
+
+        <!-- Read login and password from user. -->
+        <p>Login:    <input name="login"/></p>
+        <p>Password: <input name="password"/></p>
+
+        <!-- Submit button sends data to server. -->
+        <do type="accept" label="Submit">
+            <go href="login.cgi" method="post">
+                <postfield name="l" value="$(login)"/>
+                <postfield name="p" value="$(password)"/>
+            </go>
+        </do>
+    </card>
+</wml>

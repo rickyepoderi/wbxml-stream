@@ -699,7 +699,7 @@ public class WbXmlStreamReader implements XMLStreamReader {
             if (attr.isPrefixed()) {
                 // get the prefix and the namespace
                 String prefix  = attr.getNamePrefix();
-                String namespaceURI = parser.getDefinition().getPrefixWithLinked(prefix);
+                String namespaceURI = parser.getDefinition().getNamespaceURIWithLinked(prefix);
                 result = new QName(namespaceURI, attr.getNameWithoutPrefix(), prefix);
             } else {
                 result = new QName(attr.getName());

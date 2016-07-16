@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC
+    "-//WAPFORUM//DTD WML 1.3//EN"
+    "http://www.wapforum.org/DTD/wml13.dtd">
+
+<wml>
+    <card title="Welcome" ontimer="#main">
+        <!-- Timer waits 10 tenths of a second. -->
+        <timer value="10"/>
+        <p><img src="logo.wbmp"/></p>
+        <do type="accept"><go href="#main"/></do>
+    </card>
+
+    <card title="Main" id="main">
+        <p>Welcome to the main page!</p>
+    </card>
+</wml>

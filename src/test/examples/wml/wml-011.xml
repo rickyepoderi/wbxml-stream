@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC
+    "-//WAPFORUM//DTD WML 1.3//EN"
+    "http://www.wapforum.org/DTD/wml13.dtd">
+
+<wml>
+    <card title="Three Images">
+        <onevent type="onenterforward">
+            <refresh>
+                <setvar name="img0" value="first.wbmp"/>
+                <setvar name="img1" value="second.wbmp"/>
+                <setvar name="img2" value="third.wbmp"/>
+                <setvar name="time0" value="5"/>
+                <setvar name="time1" value="10"/>
+                <setvar name="time2" value="10"/>
+            </refresh>
+        </onevent>
+        <onevent type="ontimer">
+            <refresh>
+                <setvar name="img0" value="$(img1)"/>
+                <setvar name="img1" value="$(img2)"/>
+                <setvar name="img2" value="$(img0)"/>
+                <setvar name="time0" value="$(time1)"/>
+                <setvar name="time1" value="$(time2)"/>
+                <setvar name="time2" value="$(time0)"/>
+            </refresh>
+        </onevent>
+
+        <timer value="$(time0)"/>
+
+        <p><img src="$(img0)" alt="[image]"/></p>
+    </card>
+</wml>

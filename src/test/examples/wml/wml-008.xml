@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC
+    "-//WAPFORUM//DTD WML 1.3//EN"
+    "http://www.wapforum.org/DTD/wml13.dtd">
+
+<wml>
+    <card title="Set Pizzas" id="pizzas">
+        <p>Choose a Pizza:<select name="toppings">
+            <option value="">
+                <!-- no toppings -->
+                Plain
+            </option>
+            <option value="p;m;o">
+                <!-- pepperoni, mushrooms, olives -->
+                Pepperoni Supreme
+            </option>
+            <option value="p;b;h;a;m;o;c">
+                <!-- everything! -->
+                Full House
+            </option>
+            <option value="c;o;m">
+                <!-- chillies, olives, mushrooms -->
+                Vegetarian
+            </option>
+        </select></p>
+        <do type="accept" label="Order">
+            <go href="order?toppings=$(toppings:e)"/>
+        </do>
+        <do type="accept" label="Customize">
+            <go href="#toppings"/>
+        </do>
+    </card>
+
+    <card title="Pizza Toppings" id="toppings">
+        <p>Customize your Toppings
+        <select name="toppings" multiple="true">
+            <option value="p">Pepperoni</option>
+            <option value="h">Ham</option>
+            <option value="b">Spicy Beef</option>
+            <option value="a">Anchovies</option>
+            <option value="o">Olives</option>
+            <option value="m">Mushrooms</option>
+            <option value="c">Chillies</option>
+        </select></p>
+        <do type="accept" label="Order">
+            <go href="order.cgi?toppings=$(toppings:e)"/>
+        </do>
+    </card>
+</wml>

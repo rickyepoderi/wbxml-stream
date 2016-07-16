@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC
+    "-//WAPFORUM//DTD WML 1.3//EN"
+    "http://www.wapforum.org/DTD/wml13.dtd">
+
+<wml>
+    <card title="Enter address">
+        <p>Street:
+            <input name="street" tabindex="1"/></p>
+        <p>Town/City:
+            <input name="town" tabindex="2"/></p>
+        <p>County/State/Province:
+            <input name="county"/></p>
+        <p>Postal/Zip Code:
+            <input name="code" tabindex="3"/></p>
+        <p>Nation:
+            <input name="nation" value="uk"/></p>
+        <do type="accept" label="OK">
+            <go href="address.wmlsc#check(  )"/>
+        </do>
+    </card>
+</wml>

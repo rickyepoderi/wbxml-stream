@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC
+    "-//WAPFORUM//DTD WML 1.3//EN"
+    "http://www.wapforum.org/DTD/wml13.dtd">
+
+<wml>
+    <card title="onenterforward example">
+        <!-- Initialize state to zero on first entry. -->
+        <onevent type="onenterforward">
+            <refresh>
+                <setvar name="state" value="0"/>
+            </refresh>
+        </onevent>
+
+        <!-- Collect some information from the user. -->
+        <p><input name="text"/></p>
+
+        <!-- Send the text and the state to the server. -->
+        <do type="accept">
+            <go href="submit.cgi">
+               <postfield name="s" value="$(state)"/>
+               <postfield name="t" value="$(text)"/>
+            </go>
+        </do>
+    </card>
+</wml>

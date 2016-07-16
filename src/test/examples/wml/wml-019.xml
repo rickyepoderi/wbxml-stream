@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.3//EN" "http://www.wapforum.org/DTD/wml13.dtd">
+<wml xml:lang="en">
+
+<card id="input" >
+<onevent type="onenterforward">
+    <refresh>
+        <setvar name="n" value=""/>
+        <setvar name="p" value=""/>
+        <setvar name="n_p" value=""/>
+        <setvar name="factorialN" value=""/>
+        <setvar name="factorialP" value=""/>
+        <setvar name="factorialN_P" value=""/>
+        <setvar name="combinationNP" value=""/>
+    </refresh>
+</onevent>
+
+<p>
+    <do type="accept" label="Compute">
+        <go href="combination.wmls#go()"/>
+    </do>
+
+    Value for n:
+    <input type="text" name="n" format="*N"/>
+    Value for p:
+    <input type="text" name="p" format="*N"/>
+</p>
+</card>
+
+<card id="result">
+<p> 
+    <do type="accept" label="Back">
+        <go href="#input">
+            <setvar name="n" value=""/>
+            <setvar name="p" value=""/>
+        </go>
+    </do>
+
+    Combination &gt; WML<br/>
+    <br/>
+    fact($n)=$factorialN
+    fact($p)=$factorialP
+    fact($n_p)=$factorialN_P
+    comb($n,$p)=$combinationNP
+</p>
+</card>
+</wml>
