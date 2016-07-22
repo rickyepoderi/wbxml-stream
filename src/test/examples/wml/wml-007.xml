@@ -17,7 +17,7 @@
             <!-- ...lots more toppings here... -->
         </select></p>
         <do type="accept" label="Order">
-            <go href="order?toppings=$(toppings:e)"/>
+            <go href="order?toppings=$(toppings:escape)"/>
         </do>
     </card>
 </wml>

@@ -194,11 +194,51 @@
  * 
  * <p>WBXML also defines extensions which are tokens that can be used to 
  * encode any string value in attributes or tag contents. The extensions
- * are explained in the chapter <em>5.8.4.2. Global Extension Tokens</em> and,
- * although the specification talks about three type of extensions, the
- * <em>libwbxml</em> only uses one of them (it is supposed that no languages
- * are using the other two). In the properties file the extension is also
- * defined by two keys:</p>
+ * are explained in the chapter <em>5.8.4.2. Global Extension Tokens</em> and 
+ * three different extensions are specified:</p>
+ * 
+ * <pre>
+ * extension = [switchPage] (( EXT_I termstr ) | ( EXT_T index ) | EXT)
+ * termstr = charset-dependent string with termination
+ * index = mb_u_int32 // integer index into string table.
+ * </pre>
+ * 
+ * <p>The semantics of the tokens are defined only within the context of a 
+ * particular document type, but the format is well defined across all documents.
+ * EXT_I* extensions are associated with a string, EXT_T* are associated with a
+ * 32 bit number and EXT* are just the token itself without any data.</p>
+ * 
+ * <p>The <em>wbxml-stream</em> (since version 0.4.0) gives three new interfaces
+ * to customize what is the behavior when a EXT token is found. The interfaces
+ * are one for each type of token. This way the language can create any value 
+ * when a token is found.</p>
+ * 
+ * <p>There are three corresponding properties to associate the class implementing
+ * the interface with the extension token:</p>
+ * 
+ * <pre>
+ * wbxml.extension.EXT_I={class} // EXT_I tokens
+ * wbxml.extension.EXT_T={class} // EXT_T token
+ * wbxml.extension.EXT={class}   // EXT tokens
+ * </pre>
+ * 
+ * <p>In the current languages that <em>wbxml-stream</em> handles, two of them 
+ * uses the extension tokens. WML uses EXT_I and EXT_T extensions to encode
+ * variables. In EXT_I the variable name is encoded inside the string. In EXT_T
+ * extensions the variable name is in the STR_TBL and the number of T extensions
+ * is used to locate the name in the table. Besides WML define three types of
+ * variables (escaped, no-escaped and un-escaped) and EXT_I_0/EXT_T_0 are used
+ * for one of them, EXT_I_1/EXT_T_1 for the other and EXT_I_2/EXT_T_2 for the 
+ * last one. The second language that uses the extensions is WV (Wireless Village).
+ * In this case the language only uses EXT_T_0 to map string values to a number.
+ * This way the length to encode that values is minimized.</em>
+ * 
+ * <p>The <em>wbxml-stream</em> lets you define numeric tokens for any value
+ * extension. This is what WV language uses to encode parts of tag and 
+ * attribute values as EXT_T_0 extensions (the number associated to the EXT_0 
+ * extension is used to locate the corresponding value). If you want to reuse 
+ * that characteristic you can define any extension tokens in your language 
+ * using the following keys:</p>
  * 
  * <pre>
  * wbxml.ext.{key_differenciator}={token}
@@ -208,10 +248,9 @@
  * The second key the value for that extension.
  * </pre>
  * 
- * <p> In the languages which have been added only one of them uses 
- * extensions (WV - Wireless Village). They are used to encode some attribute
- * values specified as enum list of values and similar things. The following are 
- * some of them:</p>
+ * <p>Remember it is not standard feature (it is a extension of your language 
+ * to use EXT_T_0 tokens to substitute strings). The following are examples of 
+ * the tokens as defined in the WV language:</p>
  * 
  * <pre>
  * wbxml.ext.appvnd=0x04
@@ -224,6 +263,17 @@
  * wbxml.ext.GROUP_USER_ID_JOINED.value=GROUP_USER_ID_JOINED
  * ...
  * </pre>
+ * 
+ * <p>Once the extensions are defined, the corresponding implementation class
+ * should also be defined to manage the EXT_T_0 tokens:</p>
+ * 
+ * <pre>
+ * wbxml.extension.EXT_T=es.rickyepoderi.wbxml.document.opaque.DefaultExtTExtension
+ * </pre>
+ * 
+ * <p>This way when a EXT_T* token was found in a WBXML document (attr or tag)
+ * that class will be called. The default implementation just locates the 
+ * string associated to the number and replace it.</p>
  * 
  * <h4>Opaque Plugins</h4>
  * 

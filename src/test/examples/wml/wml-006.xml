@@ -10,7 +10,7 @@
         <p>Password:
             <input name="pass" type="password"/></p>
         <do type="accept" title="Log In">
-            <go href="login?u=$(user:e)&amp;p=$(pass:e)"/>
+            <go href="login?u=$(user:escape)&amp;p=$(pass:escape)"/>
         </do>
     </card>
 </wml>

@@ -38,10 +38,10 @@
 
     Combination &gt; WML<br/>
     <br/>
-    fact($n)=$factorialN
-    fact($p)=$factorialP
-    fact($n_p)=$factorialN_P
-    comb($n,$p)=$combinationNP
+    fact($(n))=$(factorialN)
+    fact($(p))=$(factorialP)
+    fact($(n_p))=$(factorialN_P)
+    comb($(n),$(p))=$(combinationNP)
 </p>
 </card>
 </wml>

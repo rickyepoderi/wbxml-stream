@@ -51,6 +51,9 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import es.rickyepoderi.wbxml.document.ExtensionIPlugin;
+import es.rickyepoderi.wbxml.document.ExtensionTPlugin;
+import es.rickyepoderi.wbxml.document.ExtensionPlugin;
 
 /**
  * <p>The initialization class is a way to load into the JVM all the language
@@ -251,6 +254,33 @@ public class WbXmlInitialization {
     static public final String PROP_WBXML_LINKED_DEF = "wbxml.opaque.linkeddef.";
     
     /**
+     * Name of the property to set a specific plugin for extensions EXT.
+     * 
+     * <pre>
+     * wbxml.extension.EXT={class}
+     * </pre>
+     */
+    static public final String PROP_WBXML_EXTENSION = "wbxml.extension.EXT";
+    
+    /**
+     * Name of the property to set a specific plugin for extensions EXT_I.
+     * 
+     * <pre>
+     * wbxml.extension.EXT_I={class}
+     * </pre>
+     */
+    static public final String PROP_WBXML_EXTENSION_I = "wbxml.extension.EXT_I";
+    
+    /**
+     * Name of the property to set a specific plugin for extensions EXT_T.
+     * 
+     * <pre>
+     * wbxml.extension.EXT_T={class}
+     * </pre>
+     */
+    static public final String PROP_WBXML_EXTENSION_T = "wbxml.extension.EXT_T";
+    
+    /**
      * Static list of definitions that are loaded at initialization of this class.
      */
     static private List<WbXmlDefinition> definitions = null;
@@ -438,8 +468,65 @@ public class WbXmlInitialization {
             OpaqueContentPlugin plugin = (OpaqueContentPlugin) clazz.newInstance();
             def.addOpaqueTag(tagDef, plugin);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error loading plugin {0}={1}", new Object[] {key, value});
+            log.log(Level.SEVERE, "Error loading opaque plugin {0}={1}", new Object[] {key, value});
             log.log(Level.SEVERE, "Exception",  e);
+        }
+    }
+    
+    /**
+     * Adds the content extension EXT class if defined.
+     * @param def The definition to add the opaque to
+     * @param props The properties to search the tag the opaque is used to
+     */
+    static private void setExtension(WbXmlDefinition def, Properties props) {
+        String value = props.getProperty(PROP_WBXML_EXTENSION);
+        if (value != null) {
+            try {
+                Class clazz = Class.forName(value);
+                ExtensionPlugin plugin = (ExtensionPlugin) clazz.newInstance();
+                def.setExtension(plugin);
+            } catch (Exception e) {
+                log.log(Level.SEVERE, "Error loading extension plugin {1}", value);
+                log.log(Level.SEVERE, "Exception", e);
+            }
+        }
+    }
+    
+    /**
+     * Adds the content extension EXT_I class if defined.
+     * @param def The definition to add the opaque to
+     * @param props The properties to search the tag the opaque is used to
+     */
+    static private void setExtensionI(WbXmlDefinition def, Properties props) {
+        String value = props.getProperty(PROP_WBXML_EXTENSION_I);
+        if (value != null) {
+            try {
+                Class clazz = Class.forName(value);
+                ExtensionIPlugin plugin = (ExtensionIPlugin) clazz.newInstance();
+                def.setExtensionI(plugin);
+            } catch (Exception e) {
+                log.log(Level.SEVERE, "Error loading extension plugin {1}", value);
+                log.log(Level.SEVERE, "Exception", e);
+            }
+        }
+    }
+    
+    /**
+     * Adds the content extension EXT_T class if defined.
+     * @param def The definition to add the opaque to
+     * @param props The properties to search the tag the opaque is used to
+     */
+    static private void setExtensionT(WbXmlDefinition def, Properties props) {
+        String value = props.getProperty(PROP_WBXML_EXTENSION_T);
+        if (value != null) {
+            try {
+                Class clazz = Class.forName(value);
+                ExtensionTPlugin plugin = (ExtensionTPlugin) clazz.newInstance();
+                def.setExtensionT(plugin);
+            } catch (Exception e) {
+                log.log(Level.SEVERE, "Error loading extension plugin {1}", value);
+                log.log(Level.SEVERE, "Exception", e);
+            }
         }
     }
     
@@ -511,6 +598,9 @@ public class WbXmlInitialization {
         }
         String root = props.getProperty(PROP_WBXML_ROOT_ELEMENT);
         def.setRoot(root);
+        setExtension(def, props);
+        setExtensionI(def, props);
+        setExtensionT(def, props);
         return def;
     }
     

@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<!DOCTYPE channel PUBLIC "-//WAPFORUM//DTD CHANNEL 1.1//EN" "channel.dtd">
+<channel maxspace="2048" base="http://wap.serviceprovider.com/" EventId="wtaev-cc/ic" 
+         success="success.wml" failure="failure.wml">
+  <title>Call Handler</title>
+  <abstract>
+    This service is handling incoming calls
+  </abstract>
+  <resource href="firstresource.wml"/>
+  <resource href="callhandlingscripts.wmls"/>
+  <resource href="voicemail.wmls"/>
+</channel>

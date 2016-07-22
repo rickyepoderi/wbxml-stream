@@ -24,7 +24,7 @@
             </option>
         </select></p>
         <do type="accept" label="Order">
-            <go href="order?toppings=$(toppings:e)"/>
+            <go href="order?toppings=$(toppings:escape)"/>
         </do>
         <do type="accept" label="Customize">
             <go href="#toppings"/>
@@ -43,7 +43,7 @@
             <option value="c">Chillies</option>
         </select></p>
         <do type="accept" label="Order">
-            <go href="order.cgi?toppings=$(toppings:e)"/>
+            <go href="order.cgi?toppings=$(toppings:escape)"/>
         </do>
     </card>
 </wml>

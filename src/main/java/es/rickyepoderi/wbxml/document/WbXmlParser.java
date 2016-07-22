@@ -40,7 +40,6 @@ import es.rickyepoderi.wbxml.definition.IanaCharset;
 import es.rickyepoderi.wbxml.definition.WbXmlAttributeDef;
 import es.rickyepoderi.wbxml.definition.WbXmlAttributeValueDef;
 import es.rickyepoderi.wbxml.definition.WbXmlDefinition;
-import es.rickyepoderi.wbxml.definition.WbXmlExtensionDef;
 import es.rickyepoderi.wbxml.definition.WbXmlInitialization;
 import es.rickyepoderi.wbxml.definition.WbXmlTagDef;
 import es.rickyepoderi.wbxml.definition.WbXmlToken;
@@ -620,6 +619,53 @@ public class WbXmlParser {
     }
     
     /**
+     * Method that parses a EXT extension in a attribute value.
+     * @param tagName The current tag name parsed
+     * @param ext The extension found
+     * @return The string representing this extension 
+     * @throws IOException Some error
+     */
+    public String parseAttributeExtension(String attrName, byte ext) throws IOException {
+        ExtensionPlugin plugin = doc.getDefinition().getExtension();
+        if (plugin == null) {
+            throw new IOException("EXT_X token found and no plugin associated");
+        }
+        return plugin.parseAttribute(this, attrName, ext);
+    }
+    
+    /**
+     * Method that parses a EXT_I extension in a attribute value.
+     * @param tagName The current tag name parsed
+     * @param ext The extension found
+     * @param value The string in the EXT_I
+     * @return The string representing this extension 
+     * @throws IOException Some error
+     */
+    public String parseAttributeIExtension(String attrName, byte ext, String value) throws IOException {
+        ExtensionIPlugin plugin = doc.getDefinition().getExtensionI();
+        if (plugin == null) {
+            throw new IOException("EXT_I_X token found and no plugin associated");
+        }
+        return plugin.parseAttribute(this, attrName, ext, value);
+    }
+    
+    /**
+     * Method that parses a EXT_T extension in a attribute value.
+     * @param tagName The current tag name parsed
+     * @param ext The extension found
+     * @param value The long in the EXT_I
+     * @return The string representing this extension 
+     * @throws IOException Some error
+     */
+    public String parseAttributeTExtension(String attrName, byte ext, long value) throws IOException {
+        ExtensionTPlugin plugin = doc.getDefinition().getExtensionT();
+        if (plugin == null) {
+            throw new IOException("EXT_T_X token found and no plugin associated");
+        }
+        return plugin.parseAttribute(this, attrName, ext, value);
+    }
+    
+    /**
      * Method to parse the attribute values of attribute. In the specification
      * the attribute value is defined as follows:
      * 
@@ -665,22 +711,18 @@ public class WbXmlParser {
             } else if (WbXmlLiterals.EXT_I_0 == currentByte
                     || WbXmlLiterals.EXT_I_1 == currentByte
                     || WbXmlLiterals.EXT_I_2 == currentByte) {
-                // read the string from termstr
-                values.add(readInlineString());
+                byte ext = currentByte;
+                values.add(parseAttributeIExtension(attrName, ext, readInlineString()));
             } else if (WbXmlLiterals.EXT_T_0 == currentByte
                     || WbXmlLiterals.EXT_T_1 == currentByte
                     || WbXmlLiterals.EXT_T_2 == currentByte) {
-                // read the index
-                long extToken = readUnsignedInteger();
-                WbXmlExtensionDef ext = doc.getDefinition().locateExtension(extToken);
-                if (ext == null) {
-                    throw new IOException(String.format("Unknown extension (%d)", extToken));
-                }
-                values.add(ext.getValue());
+                byte ext = currentByte;
+                long idx = readUnsignedInteger();
+                values.add(parseAttributeTExtension(attrName, ext, idx));
             } else if (WbXmlLiterals.EXT_0 == currentByte
                     || WbXmlLiterals.EXT_1 == currentByte
                     || WbXmlLiterals.EXT_2 == currentByte) {
-                throw new IOException("Implementation does not support EXT_0, EXT_1 or EXT_2 in attribute values");
+                values.add(parseAttributeExtension(attrName, currentByte));
             } else if (WbXmlLiterals.ENTITY == currentByte) {
                 // read backwards to start with ENTITY tag
                 readBackwards();
@@ -766,6 +808,53 @@ public class WbXmlParser {
     }
     
     /**
+     * Method that parses a EXT extension in a content value.
+     * @param tagName The current tag name parsed
+     * @param ext The extension found
+     * @return The string representing this extension 
+     * @throws IOException Some error
+     */
+    public WbXmlContent parseContentExtension(String attrName, byte ext) throws IOException {
+        ExtensionPlugin plugin = doc.getDefinition().getExtension();
+        if (plugin == null) {
+            throw new IOException("EXT_X token found and no plugin associated");
+        }
+        return plugin.parseContent(this, attrName, ext);
+    }
+    
+    /**
+     * Method that parses a EXT_I extension in a content value.
+     * @param tagName The current tag name parsed
+     * @param ext The extension found
+     * @param value The string in the EXT_I
+     * @return The string representing this extension 
+     * @throws IOException Some error
+     */
+    public WbXmlContent parseContentIExtension(String attrName, byte ext, String value) throws IOException {
+        ExtensionIPlugin plugin = doc.getDefinition().getExtensionI();
+        if (plugin == null) {
+            throw new IOException("EXT_I_X token found and no plugin associated");
+        }
+        return plugin.parseContent(this, attrName, ext, value);
+    }
+    
+    /**
+     * Method that parses a EXT_T extension in a content value.
+     * @param tagName The current tag name parsed
+     * @param ext The extension found
+     * @param value The long in the EXT_I
+     * @return The string representing this extension 
+     * @throws IOException Some error
+     */
+    public WbXmlContent parseContentTExtension(String attrName, byte ext, long value) throws IOException {
+        ExtensionTPlugin plugin = doc.getDefinition().getExtensionT();
+        if (plugin == null) {
+            throw new IOException("EXT_T_X token found and no plugin associated");
+        }
+        return plugin.parseContent(this, attrName, ext, value);
+    }
+    
+    /**
      * Method that parses the different types of contents in an WBXML document.
      * The content is defined in the specificatiosn as follows:
      * 
@@ -815,22 +904,18 @@ public class WbXmlParser {
         } else if (WbXmlLiterals.EXT_I_0 == currentByte
                 || WbXmlLiterals.EXT_I_1 == currentByte
                 || WbXmlLiterals.EXT_I_2 == currentByte) {
-            // read the string from termstr
-            content.setString(readInlineString());
+            byte ext = currentByte;
+            content = parseContentIExtension(tagName, ext, readInlineString());
         } else if (WbXmlLiterals.EXT_T_0 == currentByte
                 || WbXmlLiterals.EXT_T_1 == currentByte
                 || WbXmlLiterals.EXT_T_2 == currentByte) {
-            // read the index
-            long extToken = readUnsignedInteger();
-            WbXmlExtensionDef ext = doc.getDefinition().locateExtension(extToken);
-            if (ext == null) {
-                throw new IOException(String.format("Unknown extension (%x)", extToken & 0xFF));
-            }
-            content.setString(ext.getValue());
+            byte ext = currentByte;
+            long idx = readUnsignedInteger();
+            content = parseContentTExtension(tagName, ext, idx);
         } else if (WbXmlLiterals.EXT_0 == currentByte
                 || WbXmlLiterals.EXT_1 == currentByte
                 || WbXmlLiterals.EXT_2 == currentByte) {
-            throw new IOException("Implementation does not support EXT_0, EXT_1 or EXT_2 in contents");
+            content = parseContentExtension(tagName, currentByte);
         } else if (WbXmlLiterals.ENTITY == currentByte) {
             // read backwards to start with ENTITY tag
             readBackwards();

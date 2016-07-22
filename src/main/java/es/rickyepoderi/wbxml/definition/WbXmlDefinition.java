@@ -44,6 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import es.rickyepoderi.wbxml.document.ExtensionIPlugin;
+import es.rickyepoderi.wbxml.document.ExtensionTPlugin;
+import es.rickyepoderi.wbxml.document.ExtensionPlugin;
 
 /**
  *
@@ -83,6 +86,11 @@ import java.util.TreeSet;
  * <li>Linked definitions: This is a non standard feature. Some definitions mix
  * some languages using opaques. This way definitions can have another linked 
  * ones. The parsing/encoding methods use all of them.</li>
+ * <li>Extension plugin: Some languages like WML uses extensions EXT_I and EXT_T
+ * to encode variable names. A interface could be used to have a specific 
+ * processing for those extensions in attributes and contents. There are
+ * two interfaces depending if the extension is found in an attribute or in a
+ * content.</li>
  * </ul>
  * 
  * <p>The properties file is parsed and an object of this kind is created
@@ -207,6 +215,21 @@ public class WbXmlDefinition {
      * Linked definitions for this one.
      */
     private Map<String, WbXmlDefinition> linkedDefinitions = null;
+    
+    /**
+     * Specific extension for EXT_I in contents.
+     */
+    private ExtensionIPlugin extensionI;
+    
+    /**
+     * Specific extension for EXT_T in contents.
+     */
+    private ExtensionTPlugin extensionT;
+    
+    /**
+     * Specific extension for EXT in attribute values.
+     */
+    private ExtensionPlugin extension;
 
     /**
      * Constructor via name.
@@ -402,6 +425,54 @@ public class WbXmlDefinition {
      */
     public WbXmlDefinition getLinkedDef(String name) {
         return this.linkedDefinitions.get(name);
+    }
+    
+    /**
+     * Getter for the content extension plugin for EXT_I.
+     * @return The interface defined or null
+     */
+    public ExtensionIPlugin getExtensionI() {
+        return this.extensionI;
+    }
+    
+    /**
+     * Setter for the for EXT_I extension plugin for contents.
+     * @param extensionI The new content extension
+     */
+    public void setExtensionI(ExtensionIPlugin extensionI) {
+        this.extensionI = extensionI;
+    }
+
+    /**
+     * Getter for the content extension plugin for EXT_T.
+     * @return The interface defined or null
+     */
+    public ExtensionTPlugin getExtensionT() {
+        return extensionT;
+    }
+
+    /**
+     * Setter for the for EXT_T extension plugin for contents.
+     * @param extensionT The new content extension
+     */
+    public void setExtensionT(ExtensionTPlugin extensionT) {
+        this.extensionT = extensionT;
+    }
+
+    /**
+     * Getter for the content extension plugin for EXT.
+     * @return The interface defined or null
+     */
+    public ExtensionPlugin getExtension() {
+        return extension;
+    }
+
+    /**
+     * Setter for the for EXT extension plugin for contents.
+     * @param extension The new content extension
+     */
+    public void setExtension(ExtensionPlugin extension) {
+        this.extension = extension;
     }
     
     /**
@@ -825,7 +896,7 @@ public class WbXmlDefinition {
     /**
      * Utility method to obtain a namespaceURI from all the possible definitions
      * used in this definition. The method uses all the language definitions
-     * includying the linked ones.
+     * including the linked ones.
      * @param prefix The prefix of the namespaceURI to search
      * @return The namespaceURI or null
      */
@@ -928,6 +999,15 @@ public class WbXmlDefinition {
             sb.append(def.getName());
             sb.append(System.getProperty("line.separator"));
         }
+        sb.append("Extension: ");
+        sb.append(this.extension);
+        sb.append(System.getProperty("line.separator"));
+        sb.append("Extension I: ");
+        sb.append(this.extensionI);
+        sb.append(System.getProperty("line.separator"));
+        sb.append("Extension T: ");
+        sb.append(this.extensionT);
+        sb.append(System.getProperty("line.separator"));
         return sb.toString();
     }
 }

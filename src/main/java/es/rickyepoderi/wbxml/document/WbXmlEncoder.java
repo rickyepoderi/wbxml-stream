@@ -396,7 +396,7 @@ public class WbXmlEncoder {
     
     /**
      * Generic method to write strings to the stream. Depending the type of 
-     * enconding STR_I (inline) or STR_T (reference) strings are used. If type
+     * encoding STR_I (inline) or STR_T (reference) strings are used. If type
      * is NO or IF_NEEDED inline strings are used, if ALWAYS reference one are
      * written.
      * @param s The string to write to the stream
@@ -407,6 +407,27 @@ public class WbXmlEncoder {
             writeReferenceString(s);
         } else {
             writeInlineString(s);
+        }
+    }
+    
+    /**
+     * Generic method to write a EXT_T or EXT_I extension. The EXT_T extension
+     * is used if encoding is ALWAYS, otherwise the EXT_I is used.
+     * @param ext Valid values are 0, 1 or (EXT_X_0. EXT_X_1 or EXT_X_2)
+     * @param s The string to write for the extension
+     * @throws IOException SOme error
+     */
+    public void writeExtension(byte ext, String s) throws IOException {
+        if (ext != 0 && ext != 1 && ext != 2) {
+            throw new IllegalArgumentException("Invalid extension to write, should be 0, 1 or 2.");
+        }
+        if (StrtblType.ALWAYS.equals(type)) {
+            long idx = doc.getStrtbl().addString(this, s);
+            write((byte) (WbXmlLiterals.EXT_T_0 | ext));
+            writeUnsignedInteger(idx);
+        } else {
+            write((byte) (WbXmlLiterals.EXT_I_0 | ext));
+            writeTableString(s);
         }
     }
     
@@ -811,7 +832,7 @@ public class WbXmlEncoder {
     
     /**
      * Method that encodes a content into the output stream. 
-     * The content is defined in the specificatiosn as follows:
+     * The content is defined in the specification as follows:
      * 
      * <pre>
      * content = element | string | extension | entity | pi | opaque
