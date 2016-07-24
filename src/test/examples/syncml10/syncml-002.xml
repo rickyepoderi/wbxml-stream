@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE SyncML PUBLIC "-//SYNCML//DTD SyncML 1.0//EN" "http://www.syncml.org/docs/syncml_represent_v10_20001207.dtd">
+<SyncML xmlns='SYNCML:SYNCML1.0'>
+  <SyncHdr>
+    <VerDTD>1.0</VerDTD>
+    <VerProto>SyncML/1.0</VerProto>
+    <SessionID>1833556556</SessionID>
+    <MsgID>3</MsgID>
+    <Target><LocURI>http://imcfarla.homelinux.net/horde/rpc.php</LocURI></Target>
+    <Source><LocURI>350443-10-094479-0</LocURI></Source>
+    <Meta><MaxMsgSize xmlns='syncml:metinf'>200000</MaxMsgSize></Meta>
+  </SyncHdr>
+  <SyncBody>
+    <Final/>
+  </SyncBody>
+</SyncML>

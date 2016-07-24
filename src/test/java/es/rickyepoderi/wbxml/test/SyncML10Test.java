@@ -43,11 +43,11 @@ import org.testng.annotations.Test;
  *
  * @author ricky
  */
-public class SyncMLTest extends GenericDirectoryTester {
+public class SyncML10Test extends GenericDirectoryTester {
     
-    public SyncMLTest() {
-        super("src/test/examples/syncml",
-                WbXmlInitialization.getDefinitionByName("SyncML 1.1"));
+    public SyncML10Test() {
+        super("src/test/examples/syncml10",
+                WbXmlInitialization.getDefinitionByName("SyncML 1.0"));
     }
     
     @Test(groups = {"xml", "syncml", "type-if-needed", "stream" })
@@ -80,16 +80,6 @@ public class SyncMLTest extends GenericDirectoryTester {
         testWbXmlDirectory(WbXmlEncoder.StrtblType.NO, true, false);
     }
     
-    @Test(groups = {"xml", "syncml", "type-no", "jaxb", "stream" })
-    public void testXMLStreamJaxb() throws Exception {
-        testXmlJaxbDirectory(WbXmlEncoder.StrtblType.NO, true, false);
-    }
-    
-    @Test(groups = {"wbxml", "syncml", "type-no", "jaxb", "stream" })
-    public void testWBXMLStreamJaxb() throws Exception {
-        testWbXmlJaxbDirectory(WbXmlEncoder.StrtblType.NO, true, false);
-    }
-    
     
     
     @Test(groups = {"xml", "syncml", "type-if-needed", "event" })
@@ -120,15 +110,5 @@ public class SyncMLTest extends GenericDirectoryTester {
     @Test(groups = {"wbxml", "syncml", "type-no", "event" })
     public void testWbXMLEventNo() throws Exception {
         testWbXmlDirectory(WbXmlEncoder.StrtblType.NO, true, true);
-    }
-    
-    @Test(groups = {"xml", "syncml", "type-no", "jaxb", "event" })
-    public void testXMLEventJaxb() throws Exception {
-        testXmlJaxbDirectory(WbXmlEncoder.StrtblType.NO, true, true);
-    }
-    
-    @Test(groups = {"wbxml", "syncml", "type-no", "jaxb", "event" })
-    public void testWBXMLEventJaxb() throws Exception {
-        testWbXmlJaxbDirectory(WbXmlEncoder.StrtblType.NO, true, false);
     }
 }

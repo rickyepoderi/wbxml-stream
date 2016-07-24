@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE SyncML PUBLIC "-//SYNCML//DTD SyncML 1.0//EN" "http://www.syncml.org/docs/syncml_represent_v10_20001207.dtd">
+<SyncML xmlns="SYNCML:SYNCML1.0">
+  <SyncHdr>
+    <VerDTD>1.0</VerDTD>
+    <VerProto>SyncML/1.0</VerProto>
+    <SessionID>1833556556</SessionID>
+    <MsgID>3</MsgID>
+    <Target><LocURI>350443-10-094479-0</LocURI></Target>
+    <Source><LocURI>http://imcfarla.homelinux.net/horde/rpc.php</LocURI></Source>
+    <RespURI>http://imcfarla.homelinux.net/horde/rpc.php</RespURI>
+  </SyncHdr>
+  <SyncBody>
+    <Status>
+      <CmdID>1</CmdID>
+      <MsgRef>3</MsgRef>
+      <CmdRef>0</CmdRef>
+      <Cmd>SyncHdr</Cmd>
+      <SourceRef>350443-10-094479-0</SourceRef>
+      <TargetRef>http://imcfarla.homelinux.net/horde/rpc.php</TargetRef>
+      <Data>212</Data>
+    </Status>
+    <Final></Final>
+  </SyncBody>
+</SyncML>

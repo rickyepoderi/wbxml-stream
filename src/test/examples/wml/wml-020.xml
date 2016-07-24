@@ -7,7 +7,7 @@
         <go href="http://xyz.org/s"/>
       </do>
       X: $(X)<br/>
-      Y: $(Y)<br/>
+      Y: $(&#x59;)<br/>
       Enter name: <input type="text" name="N"/>
     </p>
   </card>
