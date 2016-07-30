@@ -620,7 +620,7 @@ public class WbXmlParser {
     
     /**
      * Method that parses a EXT extension in a attribute value.
-     * @param tagName The current tag name parsed
+     * @param attrName The current attribute name parsed
      * @param ext The extension found
      * @return The string representing this extension 
      * @throws IOException Some error
@@ -635,7 +635,7 @@ public class WbXmlParser {
     
     /**
      * Method that parses a EXT_I extension in a attribute value.
-     * @param tagName The current tag name parsed
+     * @param attrName The current attribute name parsed
      * @param ext The extension found
      * @param value The string in the EXT_I
      * @return The string representing this extension 
@@ -651,7 +651,7 @@ public class WbXmlParser {
     
     /**
      * Method that parses a EXT_T extension in a attribute value.
-     * @param tagName The current tag name parsed
+     * @param attrName The current attribute name parsed
      * @param ext The extension found
      * @param value The long in the EXT_I
      * @return The string representing this extension 
@@ -814,12 +814,12 @@ public class WbXmlParser {
      * @return The string representing this extension 
      * @throws IOException Some error
      */
-    public WbXmlContent parseContentExtension(String attrName, byte ext) throws IOException {
+    public WbXmlContent parseContentExtension(String tagName, byte ext) throws IOException {
         ExtensionPlugin plugin = doc.getDefinition().getExtension();
         if (plugin == null) {
             throw new IOException("EXT_X token found and no plugin associated");
         }
-        return plugin.parseContent(this, attrName, ext);
+        return plugin.parseContent(this, tagName, ext);
     }
     
     /**
@@ -830,12 +830,12 @@ public class WbXmlParser {
      * @return The string representing this extension 
      * @throws IOException Some error
      */
-    public WbXmlContent parseContentIExtension(String attrName, byte ext, String value) throws IOException {
+    public WbXmlContent parseContentIExtension(String tagName, byte ext, String value) throws IOException {
         ExtensionIPlugin plugin = doc.getDefinition().getExtensionI();
         if (plugin == null) {
             throw new IOException("EXT_I_X token found and no plugin associated");
         }
-        return plugin.parseContent(this, attrName, ext, value);
+        return plugin.parseContent(this, tagName, ext, value);
     }
     
     /**
@@ -846,17 +846,17 @@ public class WbXmlParser {
      * @return The string representing this extension 
      * @throws IOException Some error
      */
-    public WbXmlContent parseContentTExtension(String attrName, byte ext, long value) throws IOException {
+    public WbXmlContent parseContentTExtension(String tagName, byte ext, long value) throws IOException {
         ExtensionTPlugin plugin = doc.getDefinition().getExtensionT();
         if (plugin == null) {
             throw new IOException("EXT_T_X token found and no plugin associated");
         }
-        return plugin.parseContent(this, attrName, ext, value);
+        return plugin.parseContent(this, tagName, ext, value);
     }
     
     /**
      * Method that parses the different types of contents in an WBXML document.
-     * The content is defined in the specificatiosn as follows:
+     * The content is defined in the specification as follows:
      * 
      * <pre>
      * content = element | string | extension | entity | pi | opaque

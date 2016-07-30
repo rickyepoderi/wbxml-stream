@@ -214,7 +214,7 @@ final public class Xml2WbXml {
         }
         sb.append("          infile: input XML file (\"-\" means standard input)");
         sb.append(System.getProperty("line.separator"));
-        sb.append("         outfile: output WBXML file (\"-\" means sntandard output)");
+        sb.append("         outfile: output WBXML file (\"-\" means standard output)");
         sb.append(System.getProperty("line.separator"));
         throw new IllegalArgumentException(sb.toString());
     }

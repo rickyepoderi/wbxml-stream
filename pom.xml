@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>es.rickyepoderi.wbxml</groupId>
   <artifactId>wbxml-stream</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
   <packaging>bundle</packaging>
   <name>wbxml-stream</name>
   <url>https://github.com/rickyepoderi/wbxml-stream</url>
@@ -22,7 +22,7 @@
     <dependency>
       <groupId>xmlunit</groupId>
       <artifactId>xmlunit</artifactId>
-      <version>1.4</version>
+      <version>1.6</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
